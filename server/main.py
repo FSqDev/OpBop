@@ -57,6 +57,7 @@ def find_similar():
     args:
         List[String] keywords: list of keywords to search
         Int recency: max age (in days) of returned articles, 0 for any time
+        List[String] blacklist: list of top level domains blocked by user
     returns:
         List[JSON] articles: similar articles (Title, URL, Source)
     """
@@ -66,8 +67,10 @@ def find_similar():
         return Response("Expected parameter 'recency' in body", status=400)
     elif request.json["recency"] < 0:
         return Response("Cannot have negative value for recency", status=400)
+    if "blacklist" not in request.json:
+        return Response("Expected parameter 'blacklist' in body", status=400)
 
-    ret = news_utils.similar_articles(request.json["keywords"], request.json["recency"])
+    ret = news_utils.similar_articles(request.json["keywords"], request.json["recency"], request.json["blacklist"])
 
     return jsonify({
         "articles": ret
@@ -184,7 +187,7 @@ def do_the_thing():
       logprobs=10
     )
 
-    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), 0)
+    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), 0, [])
 
     return jsonify({
         "tldr": tldr,

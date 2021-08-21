@@ -13,12 +13,13 @@ from newspaper import Article
 import requests
 import xml.etree.ElementTree as ET
 from urllib.request import urlopen
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 class NewsUtils:
     """ Class that handles fetching, parsing and searching of news articles for OpBop """
     KEYWORDS = 3
-    SIMILAR_ARTICLES = 5
+    SIMILAR_ARTICLES = 4
     RSS_INDEX = {
         "title": 0,
         "url": 1,
@@ -78,7 +79,7 @@ class NewsUtils:
         sent_len = [sentences[i] for i in range(0, len(final)) if final[i]]
         return int(len(sent_len))
 
-    def similar_articles(self, keywords: list, recency: int) -> list:
+    def similar_articles(self, keywords: list, recency: int, blacklist: list) -> list:
         """ Given a list of keywords, finds relevant news articles published within specified number of days """
         ret = []
 
@@ -88,16 +89,20 @@ class NewsUtils:
             if count == NewsUtils.SIMILAR_ARTICLES:
                 break
             if child.tag == "item":
-                count += 1
-                webpage = urlopen(child[NewsUtils.RSS_INDEX["url"]].text).read()
+                url = child[NewsUtils.RSS_INDEX["url"]].text
+                webpage = urlopen(url).read()
                 soup = BeautifulSoup(webpage, "lxml")
 
-                ret.append({
-                    "title": child[NewsUtils.RSS_INDEX["title"]].text,
-                    "url": child[NewsUtils.RSS_INDEX["url"]].text,
-                    "image": soup.find("meta", property="og:image")["content"],
-                    "source": child[NewsUtils.RSS_INDEX["source"]].text
-                })
+                if urlparse(url).netloc.strip("www.") in blacklist:
+                    pass
+                else:
+                    count += 1
+                    ret.append({
+                        "title": child[NewsUtils.RSS_INDEX["title"]].text,
+                        "url": url,
+                        "image": soup.find("meta", property="og:image")["content"],
+                        "source": child[NewsUtils.RSS_INDEX["source"]].text
+                    })
 
         return ret
     
