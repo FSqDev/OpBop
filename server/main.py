@@ -91,6 +91,16 @@ def do_the_thing():
     pass
 
 
+@app.route('/api/banana', methods=['POST'])
+def banana():
+    """ 
+    Frontend request this
+    """
+    return jsonify({
+        "value": "banana"
+    })
+
+
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     app.run(port=port)
