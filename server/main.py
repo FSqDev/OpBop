@@ -1,9 +1,13 @@
 # General
-from flask import Flask
+from flask import Flask, Response, request, jsonify
 import os
 
+# Custom wrappers
+from newsutils import NewsUtils
+from summarize import summarize
 
 app = Flask("app")
+news_utils = NewsUtils(True)
 
 
 @app.route('/')
@@ -12,8 +16,8 @@ def home():
     return 'OpBop server is running'
 
 
-@app.route('/api/parsearticle', methods=['GET'])
-def parsearticle():
+@app.route('/api/parsearticle', methods=['POST'])
+def parse_article():
     """
     Takes URL of a news article and extracts data used by other functions
 
@@ -24,11 +28,21 @@ def parsearticle():
         List[String] keywords: keywords extracted from maintext
         Int reliability: flag indicating reliability (1 unreliable, 2 somewhat unreliable, 3 mixed, 4 most reliable)
     """
-    pass
+    if "url" not in request.json:
+        return Response("Expected parameter 'url' in body", status=400)
+
+    maintext = news_utils.parse_main_text(request.json["url"])
+    keywords = news_utils.parse_keywords(maintext)
+
+    return jsonify({
+        "maintext": maintext,
+        "keywords": keywords,
+        "reliability": 0
+    })
 
 
-@app.route('/api/findsimilar', methods=['GET'])
-def findsimilar():
+@app.route('/api/findsimilar', methods=['POST'])
+def find_similar():
     """
     Finds relevant articles based on provided keywords and parameters
 
@@ -41,7 +55,7 @@ def findsimilar():
     pass
 
 
-@app.route('/api/shorten', methods=['GET'])
+@app.route('/api/shorten', methods=['POST'])
 def shorten():
     """
     Takes the input text and shortens it in a tl;dr style using SMMRY
@@ -51,10 +65,10 @@ def shorten():
     returns:
         String maintext: shortened text
     """
-    pass
+    return summarize(request.args.get("maintext"))
 
 
-@app.route('/api/simplify', methods=['GET'])
+@app.route('/api/simplify', methods=['POST'])
 def simplify():
     """
     Takes the input text and simplifies it to "2nd grader English" using OpenAI
@@ -68,13 +82,23 @@ def simplify():
     pass
 
 
-@app.route('/api/dothething', methods=['GET'])
-def dothething():
+@app.route('/api/dothething', methods=['POST'])
+def do_the_thing():
     """
     Basically every other API combined into one for 'internal' use
     TODO
     """
     pass
+
+
+@app.route('/api/banana', methods=['POST'])
+def banana():
+    """ 
+    Frontend request this
+    """
+    return jsonify({
+        "value": "banana"
+    })
 
 
 if __name__ == "__main__":

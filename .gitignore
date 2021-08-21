@@ -1,0 +1,5 @@
+# Frontend
+/.idea
+
+# Backend
+server/__pycache__
