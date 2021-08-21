@@ -10,7 +10,7 @@ function initializeSimilarArticleRangeInput() {
         disableDateFiltering(enableSimilarArticleFiltering);
 
         let days = data.articleRange;
-        if (days != null) {
+        if (days != undefined) {
             articleRange.value = days;
         }
 
