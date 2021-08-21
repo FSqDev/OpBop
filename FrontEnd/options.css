@@ -6,8 +6,9 @@ body {
     background-color: #222;
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding-top: 20px;
+    /* align-items: center; */
+    padding: 20px;
+    /* min-height: 100vh; */
 }
 
 .options-menu {
@@ -31,4 +32,8 @@ h1 {
 
 p {
     font-size: 1em;
+}
+
+input[type=number] {
+    max-width: 4em;
 }
