@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>OpBop</title>
+  </head>
+  <body>
+    <h1>OpBop</h1>
+
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+          <button class="nav-link active" id="tldr-tab" data-bs-toggle="tab" data-bs-target="#nav-tldr" type="button" role="tab" aria-controls="nav-tldr" aria-selected="true">TL;DR</button>
+          <button class="nav-link" id="simplification-tab" data-bs-toggle="tab" data-bs-target="#nav-simplification" type="button" role="tab" aria-controls="nav-simplification" aria-selected="false">Simplification</button>
+          <button class="nav-link" id="similar-tab" data-bs-toggle="tab" data-bs-target="#nav-similar" type="button" role="tab" aria-controls="nav-similar" aria-selected="false">Similar Articles</button>
+        </div>
+      </nav>
+      <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-tldr" role="tabpanel" aria-labelledby="tldr-tab">This is where the tl;dr will be</div>
+        <div class="tab-pane fade" id="nav-simplification" role="tabpanel" aria-labelledby="simplification-tab">This is where the highlighted text will appear as simplified text</div>
+        <div class="tab-pane fade" id="nav-similar" role="tabpanel" aria-labelledby="similar-tab">
+          <ul id="related-articles">
+            <li>Related article <a href="https://www.google.ca">1</a></li>
+            <li>Related article <a href="https://www.youtube.com">2</a></li>
+            <li>Related article <a href="https://www.poplar.com">3</a></li>
+            <li>Related article <a href="https://opbop.herokuapp.com/">4</a></li>
+          </ul>
+        </div>
+      </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+  </body>
+</html>
