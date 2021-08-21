@@ -1,14 +1,6 @@
-let parseButton = document.getElementById("parseButton")
+let parseButton = document.getElementById("parse-button")
 let tldr = document.getElementById("tldr-text")
 let tldrTab = document.getElementById("tldr-tab")
-
-chrome.storage.sync.get("color", ({color}) => {
-    changeColor.style.backgroundColor = color;
-});
-
-chrome.storage.sync.get("test", ({text}) => {
-    testText.innerHTML = text;
-});
 
 // When the button is clicked, inject setPageBackgroundColor into current page
 parseButton.addEventListener("click", async () => {
@@ -16,7 +8,7 @@ parseButton.addEventListener("click", async () => {
 
     let text = tab.url;
 
-    fetch("https://opbop.herokuapp.com/api/banana",
+    fetch(urls.banana,
         {
             method: "post",
             headers: {
@@ -31,3 +23,11 @@ parseButton.addEventListener("click", async () => {
         });
     });
 });
+
+//api
+const basePath = 'https://opbop.herokuapp.com/'
+const apiPath = basePath + 'api/'
+
+const urls = {
+    banana : apiPath + 'banana',
+}
