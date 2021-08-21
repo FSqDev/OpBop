@@ -3,7 +3,6 @@ import string
 from heapq import nlargest
 from flask import jsonify
 
-
 def summarize(text: str) -> dict:
     print(text.count("."))
     length = int(round(text.count(".") / 5))
