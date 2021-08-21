@@ -8,7 +8,6 @@ body {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    /* min-height: 100vh; */
 }
 
 .options-menu {
@@ -26,6 +25,10 @@ h1 {
     text-align: center;
 }
 
+h2 {
+    font-size: 1.25em;
+}
+
 .form-check-input {
     margin-left: 0.25em;
 }
@@ -40,6 +43,35 @@ input[type=number] {
 
 form {
     display: inline;
+}
+
+#article-date-warning {
+    color: crimson;
+}
+
+#filter-level {
+    -webkit-appearance: none;
+    margin-left: 35%;
+    width: 30%;
+    height: 24px;
+    background: white;
+    border: 1px solid #222;
+    border-radius: 12px;
+}
+
+#filter-level::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #222;
+    cursor: pointer;
+}
+
+#filter-description {
+    font-size: 80%;
+    text-align: center;
 }
 
 #blacklist-list div {
@@ -65,19 +97,19 @@ form {
 
 button {
     display:inline-block;
-    border:0.1em solid #000;
+    border:0.1em solid #222;
     border-radius:0.2em;
     box-sizing: border-box;
     text-decoration:none;
     font-weight:400;
-    color:#000;
+    color:#222;
     text-align:center;
     transition: all 0.2s;
 }
 
 button:hover{
     color:#FFF;
-    background-color:#000;
+    background-color:#222;
 }
 
 /* @media all and (max-width:30em){
@@ -86,3 +118,19 @@ button:hover{
         margin:0.4em auto;
     }
 } */
+
+input[type=checkbox]:checked {
+    background-color: #222;
+    border-color: #222;
+    box-shadow: none;
+}
+
+input[type=checkbox]:hover {
+    border-color: #222;
+    box-shadow: none;
+}
+
+input[type=checkbox]:focus {
+    border-color: #222;
+    box-shadow: none;
+}
