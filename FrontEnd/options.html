@@ -7,35 +7,34 @@
 </head>
 
 <body>
-<div class="options-menu">
-    <h1>Options Menu</h1>
-    <div id="article-range-div">
-        <h2>Range for similar articles</h2>
-        <p>
-            <label for="should-filter-article-range">Enable article range filter:</label><input
-                id="should-filter-article-range" type="checkbox" class="form-check-input"/>
-        </p>
-        <label>Articles from the past&nbsp; <input id="article-range" type="number" min="1"/> &nbsp;days</label>
-        </p>
-    </div>
-    <div id="explicit-filter">
-        <h2>Content Filters</h2>
-        <label for="enable-explicit-filter">Enable explicit filter:</label><input id="enable-explicit-filter"
-                                                                                  type="checkbox"
-                                                                                  class="form-check-input"/>
-    </div>
-    <div id="blacklist">
-        <h2>Blacklisted Article Websites</h2>
-        <div id="blacklist-list"></div>
-        <div>
-            <label for="blacklist-input">Exclude website: &nbsp;</label><input id="blacklist-input"/>
-            <button id="blacklist-add">Submit</button>
+    <div class="options-menu">
+        <h1>Options Menu</h1>
+        <div id="article-range-div">
+            <h2>Range for similar articles</h2>
+            <p>
+                <label for="should-filter-article-range">Enable article range filter:</label><input
+                    id="should-filter-article-range" type="checkbox" class="form-check-input" />
+            </p>
+            <label>Articles from the past&nbsp; <input id="article-range" type="number" min="1" /> &nbsp;days</label>
+            </p>
+        </div>
+        <div id="explicit-filter">
+            <h2>Content Filters</h2>
+            <label for="enable-explicit-filter">Enable explicit filter:</label><input id="enable-explicit-filter"
+                type="checkbox" class="form-check-input" />
+        </div>
+        <div id="blacklist">
+            <h2>Blacklisted Article Websites</h2>
+            <div id="blacklist-list"></div>
+            <div>
+                <label for="blacklist-input">Exclude website: &nbsp;</label><input id="blacklist-input" />
+                <button id="blacklist-add">Submit</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="bootstrap-510-dist/js/bootstrap.min.js"></script>
-<script src="options.js"></script>
+    <script src="bootstrap-510-dist/js/bootstrap.min.js"></script>
+    <script src="options.js"></script>
 </body>
 
 </html>
