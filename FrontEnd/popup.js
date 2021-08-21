@@ -1,20 +1,33 @@
-let changeColor = document.getElementById("changeColor");
+let parseButton = document.getElementById("parseButton")
+let tldr = document.getElementById("tldr-text")
+let tldrTab = document.getElementById("tldr-tab")
 
-chrome.storage.sync.get("color", ({ color }) => {
-  changeColor.style.backgroundColor = color;
+chrome.storage.sync.get("color", ({color}) => {
+    changeColor.style.backgroundColor = color;
 });
 
-changeColor.addEventListener("click", async () => {
-    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+chrome.storage.sync.get("test", ({text}) => {
+    testText.innerHTML = text;
+});
 
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: setPageBackgroundColor,
-    });
-  });
+// When the button is clicked, inject setPageBackgroundColor into current page
+parseButton.addEventListener("click", async () => {
+    let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
 
-  function setPageBackgroundColor() {
-    chrome.storage.sync.get("color", ({ color }) => {
-      document.body.style.backgroundColor = color;
+    let text = tab.url;
+
+    fetch("https://opbop.herokuapp.com/api/banana",
+        {
+            method: "post",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({mainText: 'ginormous banana'})
+        }
+    ).then(function (res) {
+        res.json().then(function(data) {
+            tldr.innerHTML = data.value;
+        });
     });
-  }
+});
