@@ -10,7 +10,7 @@ function initializeSimilarArticleRangeInput() {
         disableDateFiltering(enableSimilarArticleFiltering);
 
         let days = data.articleRange;
-        if (days != null) {
+        if (days != undefined) {
             articleRange.value = days;
         }
 
@@ -86,7 +86,7 @@ function createBlackListEntry(url, id) {
 
 function deleteBlackListEntry(id) {
     chrome.storage.sync.get("blackList", (data) => {
-        data.blackList.splice(id, id + 1);
+        data.blackList.splice(id, 1);
         chrome.storage.sync.set({blackList: data.blackList});
         renderBlackList();
     });

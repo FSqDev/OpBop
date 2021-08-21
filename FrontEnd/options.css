@@ -41,3 +41,24 @@ input[type=number] {
 form {
     display: inline;
 }
+
+#blacklist-list div {
+    display: list-item;
+    list-style-type: disc;
+    list-style-position: inside;
+    padding-bottom: 0.2em;
+}
+
+#blacklist-list button {
+    padding-left: 0.5em;
+    color: crimson;
+    border: none;
+    background: none;
+}
+
+#blacklist-list button:hover {
+    padding-left: 0.5em;
+    font-weight: bolder;
+    border: none;
+    background: none;
+}

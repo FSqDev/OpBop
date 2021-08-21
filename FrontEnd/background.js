@@ -2,7 +2,7 @@
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.get("blackList", (data) => {
-    if (data.blackList == null) {
+    if (data.blackList == undefined) {
       chrome.storage.sync.set({ blackList: [] });
     }
   })
