@@ -8,36 +8,43 @@ parseButton.addEventListener("click", async () => {
     parse(url);
 });
 
-const parse = (url) => {
-    fetch(urls.main,
-        {
-            method: "post",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({url: url})
-        }
-    ).then(function (res) {
-        res.json().then(function(data) {
-            populateTldr(data.tldr);
-            populateSimplified(data.simplified);
-            populateSimilarArticles(data.articles);
+function parse(url) {
+    chrome.storage.sync.get(["enableSimilarArticleFiltering", "similarArticleRangeBefore", "similarArticleRangeAfter", "enableExplicitFiltering"], data => {
+        fetch(urls.main,
+            {
+                method: "post",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: url,
+                    beforeDate: data.enableSimilarArticleFiltering ? data.similarArticleRangeBefore : null,
+                    afterDate: enableSimilarArticleFiltering ? data.similarArticleRangeAfter : null,
+                    filterExplicit: data.enableExplicitFiltering == null ? false : data.enableExplicitFiltering
+                })
+            }
+        ).then(function (res) {
+            res.json().then(function (data) {
+                populateTldr(data.tldr);
+                populateSimplified(data.simplified);
+                populateSimilarArticles(data.articles);
+            });
         });
     });
 }
 
-const populateTldr = (tldrText) => {
+function populateTldr(tldrText) {
     let tldr = document.getElementById("tldr-text");
     tldr.innerHTML = tldrText;
 }
 
-const populateSimplified = (simiplifiedText) => {
+function populateSimplified(simiplifiedText) {
     let simplified = document.getElementById("simplified-text");
     simplified.innerText = simiplifiedText;
 }
 
-const populateSimilarArticles = (articles) => {
+function populateSimilarArticles(articles) {
     const similarArticleList = document.getElementById("related-articles");
     similarArticleList.innerHTML = "";
     articles.forEach((article) => {
@@ -56,6 +63,6 @@ const basePath = 'https://opbop.herokuapp.com/'
 const apiPath = basePath + 'api/'
 
 const urls = {
-    banana : apiPath + 'banana',
-    main : apiPath + 'dothethingdev'
+    banana: apiPath + 'banana',
+    main: apiPath + 'dothethingdev'
 }
