@@ -79,11 +79,11 @@ class NewsUtils:
         sent_len = [sentences[i] for i in range(0, len(final)) if final[i]]
         return int(len(sent_len))
 
-    def similar_articles(self, keywords: list, recency: int, blacklist: list) -> list:
+    def similar_articles(self, keywords: list, fromm, to, blacklist: list) -> list:
         """ Given a list of keywords, finds relevant news articles published within specified number of days """
         ret = []
 
-        xml_root = ET.fromstring(self._load_rss(keywords, recency))
+        xml_root = ET.fromstring(self._load_rss(keywords, fromm, to))
         count = 0
         for child in xml_root[0]:
             if count == NewsUtils.SIMILAR_ARTICLES:
@@ -106,9 +106,8 @@ class NewsUtils:
 
         return ret
     
-    def _load_rss(self, keywords: list, recency: int) -> str:
+    def _load_rss(self, keywords: list, fromm, to) -> str:
         """ similar_articles helper, gets XML from google news RSS """
         url = "https://news.google.com/rss/search?q=" + "%20".join(keywords)
-        if recency != 0:
-            url = url + "%20when%3A" + str(recency) + "d"
+        url += f"+after:{fromm}+before:{to}"
         return requests.get(url).text

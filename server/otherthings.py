@@ -8,7 +8,7 @@ from heapq import nlargest
 
 
 def summarize(text: str) -> dict:
-    length = int(round(text.count(".") / 5))
+    length = int(round(text.count(".") / 10))
 
     # Remove punctuation
     nopunc = [char for char in text if char not in string.punctuation]

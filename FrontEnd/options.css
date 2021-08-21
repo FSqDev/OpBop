@@ -6,13 +6,13 @@ body {
     background-color: #222;
     display: flex;
     justify-content: center;
-    /* align-items: center; */
+    align-items: center;
     padding: 20px;
     /* min-height: 100vh; */
 }
 
 .options-menu {
-    background-color: white;
+    background-color: whitesmoke;
     border-radius: 10px;
     padding: 15px 25px;
     width: 100%;
@@ -36,4 +36,8 @@ p {
 
 input[type=number] {
     max-width: 4em;
+}
+
+form {
+    display: inline;
 }
