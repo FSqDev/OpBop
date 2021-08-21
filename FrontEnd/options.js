@@ -1,17 +1,23 @@
-let articleRange = document.getElementById("article-range");
+let articleRangeBefore = document.getElementById("article-range-before");
+let articleRangeAfter = document.getElementById("article-range-after");
 let enableDateFiltering = document.getElementById("should-filter-article-range");
 let enableExplicitFilter = document.getElementById("enable-explicit-filter");
 let blackListAddButton = document.getElementById("blacklist-add");
 
 function initializeSimilarArticleRangeInput() {
-    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRange", "enableExplicitFiltering"], (data) => {
+    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRangeBefore", "articleRangeAfter", "enableExplicitFiltering"], (data) => {
         let enableSimilarArticleFiltering = data.enableSimilarArticleFiltering;
         enableDateFiltering.checked = enableSimilarArticleFiltering;
         disableDateFiltering(enableSimilarArticleFiltering);
 
-        let days = data.articleRange;
-        if (days != undefined) {
-            articleRange.value = days;
+        let beforeDate = data.articleRangeBefore;
+        if (beforeDate != undefined) {
+            articleRangeBefore.value = beforeDate;
+        }
+
+        let afterDate = data.articleRangeAfter;
+        if (afterDate != undefined) {
+            articleRangeAfter.value = afterDate;
         }
 
         let enableExplicitFiltering = data.enableExplicitFiltering;
@@ -20,7 +26,8 @@ function initializeSimilarArticleRangeInput() {
         renderBlackList();
     });
 
-    articleRange.addEventListener('input', updateArticleRangeValue);
+    articleRangeBefore.addEventListener('input', updateArticleRangeBeforeValue);
+    articleRangeAfter.addEventListener('input', updateArticleRangeAfterValue);
     enableDateFiltering.addEventListener('input', updateEnableDateFiltering);
     enableExplicitFilter.addEventListener('input', updateExplicitFiltering);
     blackListAddButton.addEventListener('click', addToBlackList)
@@ -34,12 +41,18 @@ function updateEnableDateFiltering(value) {
 }
 
 function disableDateFiltering(enabled) {
-    articleRange.disabled = !enabled;
+    articleRangeAfter.disabled = !enabled;
+    articleRangeBefore.disabled = !enabled;
 }
 
-function updateArticleRangeValue(value) {
-    let articleRange = value.target.value;
-    chrome.storage.sync.set({articleRange});
+function updateArticleRangeBeforeValue(value) {
+    let date = value.target.value;
+    chrome.storage.sync.set({articleRangeBefore: date});
+}
+
+function updateArticleRangeAfterValue(value) {
+    let date = value.target.value;
+    chrome.storage.sync.set({articleRangeAfter: date});
 }
 
 function updateExplicitFiltering(value) {
