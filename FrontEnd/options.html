@@ -8,34 +8,42 @@
 
 <body>
     <div class="options-menu">
-        <h1>Options Menu</h1>
+        <h1>OpBop Settings</h1>
         <div id="article-range-div">
-            <h2>Range for similar articles</h2>
+            <h2>Similar Articles</h2>
             <p>
-                <label for="should-filter-article-range">Enable article range filter:</label><input
-                    id="should-filter-article-range" type="checkbox" class="form-check-input btn-outline-secondary" />
+                <label for="should-filter-article-range">Enable publication date filtering</label>
+                <input id="should-filter-article-range" type="checkbox" class="form-check-input" />
             </p>
-            <p>
-                <label>Filter articles to after&nbsp; <input id="article-range-after" type="date" /> </label>
-                <label>&nbsp;and before&nbsp; <input id="article-range-before" type="date" /> </label>
-            </p>
+            <div id="article-date-filters">
+                <p>
+                    <label style="padding-left: 25px;">Published after:&nbsp; <input id="article-range-after" type="date" />
+                </p>
+                <p>
+                    <label style="padding-left: 25px;">Published before:&nbsp; <input id="article-range-before" type="date" />
+                </p>
+                <p id="article-date-warning" hidden>Please ensure both values are set.</p>
+            </div>
+            <div id="blacklist">
+                <p>Blacklist - disable suggestions from these sources</p>
+                <p>
+                    <div>
+                        <label style="padding-left: 30px;" for="blacklist-input">Add to list: &nbsp;</label><input id="blacklist-input" />
+                        <button id="blacklist-add">Submit</button>
+                    </div>
+                    <div style="padding-left: 30px;" id="blacklist-list"></div>
+                </p>
+            </div>
         </div>
         <div id="explicit-filter">
             <h2>Content Filters</h2>
+            <p>Content filters allow you to choose whether explicit content is simplified and shown to you.</p>
+            <input id="filter-level" type="range" min="0" max="2" value="0">
+            <p id="filter-description"></p>
             <p>
-                <label for="enable-explicit-filter">Enable explicit filter:</label><input id="enable-explicit-filter"
-                    type="checkbox" class="form-check-input btn-outline-secondary" />
+                <label>Do not show images in the extension when content is blocked</label>
+                <input type="checkbox" class="form-check-input" />
             </p>
-        </div>
-        <div id="blacklist">
-            <h2>Blacklisted Article Websites</h2>
-            <p>
-            <div id="blacklist-list"></div>
-            </p>
-            <div>
-                <label for="blacklist-input">Exclude website: &nbsp;</label><input id="blacklist-input" />
-                <button id="blacklist-add">Submit</button>
-            </div>
         </div>
     </div>
 
