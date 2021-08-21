@@ -65,19 +65,19 @@ form {
 
 button {
     display:inline-block;
-    border:0.1em solid #000;
+    border:0.1em solid slategrey;
     border-radius:0.2em;
     box-sizing: border-box;
     text-decoration:none;
     font-weight:400;
-    color:#000;
+    color:slategrey;
     text-align:center;
     transition: all 0.2s;
 }
 
 button:hover{
     color:#FFF;
-    background-color:#000;
+    background-color:slategrey;
 }
 
 /* @media all and (max-width:30em){
@@ -86,3 +86,12 @@ button:hover{
         margin:0.4em auto;
     }
 } */
+
+input[type=checkbox]:checked {
+    background-color: slategrey;
+    border-color: #222;
+}
+
+input[type=checkbox]:hover {
+    border-color: #222;
+}
