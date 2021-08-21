@@ -1,10 +1,8 @@
 import nltk
 import string
 from heapq import nlargest
-from flask import jsonify
 
 def summarize(text: str) -> dict:
-    print(text.count("."))
     length = int(round(text.count(".") / 5))
 
     # Remove punctuation
@@ -40,7 +38,7 @@ def summarize(text: str) -> dict:
 
     summary_sents = nlargest(length, sent_score, key = sent_score.get)
     summary = ' '.join(summary_sents)
-    return jsonify(
-        reduction=(len(text) - len(summary)) / len(text),
-        summary=summary
-    )
+    return {
+        "reduction": int(100 * (len(text) - len(summary)) / len(text)),
+        "summary": summary
+    }

@@ -8,17 +8,22 @@ from nltk.tokenize import word_tokenize
 # Keywords - other
 from operator import itemgetter
 import math
-# Maintext
+# Scraping
 from newspaper import Article
+import requests
+import xml.etree.ElementTree as ET
 
 class NewsUtils:
     """ Class that handles fetching, parsing and searching of news articles for OpBop """
     KEYWORDS = 3
+    SIMILAR_ARTICLES = 5
+    RSS_INDEX = {
+        "title": 0,
+        "url": 1,
+        "source": 5
+    }
 
-    def __init__(self, debug = False):
-        self.debug = debug
-
-    def parse_maintext_title(self, url: str) -> str:
+    def parse_maintext_title(self, url: str) -> dict:
         """ Gets the main body of text from an article, given url """
         article = Article(url)
         article.download()
@@ -70,3 +75,24 @@ class NewsUtils:
         final = [all([w in x for w in word]) for x in sentences] 
         sent_len = [sentences[i] for i in range(0, len(final)) if final[i]]
         return int(len(sent_len))
+
+    def similar_articles(self, keywords: list, recency: int) -> list:
+        """ Given a list of keywords, finds relevant news articles published within specified number of days """
+        ret = []
+
+        xml_root = ET.fromstring(self._load_rss(keywords, recency))
+        for child in xml_root[0]:
+            if child.tag == "item":
+                ret.append({
+                    "title": child[NewsUtils.RSS_INDEX["title"]].text,
+                    "url": child[NewsUtils.RSS_INDEX["url"]].text,
+                    "source": child[NewsUtils.RSS_INDEX["source"]].text
+                })
+        return ret
+    
+    def _load_rss(self, keywords: list, recency: int) -> str:
+        """ similar_articles helper, gets XML from google news RSS """
+        url = "https://news.google.com/rss/search?q=" + "%20".join(keywords)
+        if recency != 0:
+            url = url + "%20when%3A" + str(recency) + "d"
+        return requests.get(url).text
