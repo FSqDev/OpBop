@@ -31,8 +31,9 @@ def parse_article():
     if "url" not in request.json:
         return Response("Expected parameter 'url' in body", status=400)
 
-    maintext = news_utils.parse_main_text(request.json["url"])
-    keywords = news_utils.parse_keywords(maintext)
+    ret = news_utils.parse_maintext_title(request.json["url"])
+    maintext = ret["maintext"]
+    keywords = news_utils.parse_keywords(ret["title"])
 
     return jsonify({
         "maintext": maintext,

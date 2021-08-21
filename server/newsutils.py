@@ -9,23 +9,31 @@ from nltk.tokenize import word_tokenize
 from operator import itemgetter
 import math
 # Maintext
-from newsplease import NewsPlease, NewsArticle
+from newspaper import Article
 
 class NewsUtils:
     """ Class that handles fetching, parsing and searching of news articles for OpBop """
-    KEYWORDS = 5
+    KEYWORDS = 3
 
     def __init__(self, debug = False):
         self.debug = debug
-        self.np = NewsPlease
 
-    def parse_main_text(self, url: str) -> str:
+    def parse_maintext_title(self, url: str) -> str:
         """ Gets the main body of text from an article, given url """
-        article = self.np.from_url(url)
-        return article.maintext.replace("\n", "")
+        article = Article(url)
+        article.download()
+        article.parse()
+        return {
+            "maintext": article.text.replace("\n", ""),
+            "title": article.title
+        }
 
     def parse_keywords(self, text: str) -> list:
         """ Extracts keywords from a passage of text """
+        # Input cleaning
+        text = text.replace(",", "")
+        text = text.lower()
+
         # Stopwords and vars
         stop_words = set(stopwords.words('english'))
         total_words = text.split()
@@ -55,9 +63,9 @@ class NewsUtils:
 
         # Calculate scores and return top weighted
         tf_idf_score = {key: tf_score[key] * idf_score.get(key, 0) for key in tf_score.keys()}
-        return dict(sorted(tf_idf_score.items(), key = itemgetter(1), reverse = True)[:NewsUtils.KEYWORDS]) 
+        return list(dict(sorted(tf_idf_score.items(), key = itemgetter(1), reverse = True)[:NewsUtils.KEYWORDS]).keys())
     
-    def _check_sent(self, word: str, sentences: list):
+    def _check_sent(self, word: str, sentences):
         """ parse_keywords helper - Check if word present in sentence list """
         final = [all([w in x for w in word]) for x in sentences] 
         sent_len = [sentences[i] for i in range(0, len(final)) if final[i]]
