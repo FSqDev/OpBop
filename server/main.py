@@ -202,8 +202,17 @@ def do_the_thing():
     sens = sensitivity["choices"][0]["text"]
 
     warning = None
-    if sens in {'1', '2'} and filterbaddybads:
-        warning = "This shit could be offensive"
+    if filterbaddybads:
+        if sens == "1":
+            warning = (
+                "This article contains potentially sensitive topics, "
+                "eg. policitcal, religious or race related content."
+            )
+        elif sens == "2":
+            warning = (
+                "This article contains unsafe content, "
+                "eg. profane/prejudice language."
+            )
 
     articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], [])
 
