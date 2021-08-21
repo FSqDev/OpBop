@@ -4,7 +4,9 @@ import os
 
 # Custom wrappers
 from newsutils import NewsUtils
-from summarize import summarize
+from otherthings import summarize
+import openai
+from dotenv import load_dotenv
 
 app = Flask("app")
 news_utils = NewsUtils(True)
@@ -76,11 +78,42 @@ def simplify():
 
     args:
         String maintext: whatever text needs to be simplified
+        
     returns:
         String maintext: simplified text
         Int sensitivity: flag indicating sensitive content (0 none, 1 sensitive, 2 explicit)
     """
-    pass
+    text = request.args.get("maintext")
+
+    simplified = openai.Completion.create(
+        # engine='davinci',
+        engine='davinci-instruct-beta',
+        # prompt=f"My second grader asked me what this passage means:\n\"\"\"\n{text}\n\"\"\"\nI rephrased it for him, in plain language a second grader can understand:\n\"\"\"\n",
+        prompt=f"explain the following text in a way a second grader would understand:\n\\\n{text}\n",
+        temperature=0,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
+        stop=["\"\"\""],
+        max_tokens=len(text.split())
+    )
+
+    text_saftey = openai.Completion.create(
+      engine="content-filter-alpha-c4",
+      prompt = "<|endoftext|>"+text+"\n--\nLabel:",
+      temperature=0,
+      max_tokens=1,
+      top_p=1,
+      frequency_penalty=0,
+      presence_penalty=0,
+      logprobs=10
+    )
+
+    return jsonify(
+        maintext=simplified['choices'][0]['text'],
+        sensitivity=text_saftey["choices"][0]["text"]
+    )
+
 
 
 @app.route('/api/dothething', methods=['POST'])
@@ -103,5 +136,7 @@ def banana():
 
 
 if __name__ == "__main__":
+    load_dotenv()
+    openai.api_key = os.getenv('OPENAI_SK')
     port = int(os.environ.get('PORT', 5000))
     app.run(port=port)
