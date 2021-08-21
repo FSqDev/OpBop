@@ -1,9 +1,10 @@
 import nltk
 import string
 from heapq import nlargest
+from flask import jsonify
 
 
-def summarize(text: str) -> str:
+def summarize(text: str) -> dict:
     print(text.count("."))
     length = int(round(text.count(".") / 5))
 
@@ -39,4 +40,8 @@ def summarize(text: str) -> str:
                     sent_score[sent] = sent_score[sent] + word_freq[word]
 
     summary_sents = nlargest(length, sent_score, key = sent_score.get)
-    return ' '.join(summary_sents)
+    summary = ' '.join(summary_sents)
+    return jsonify(
+        reduction=1 - len(summary) / len(text),
+        summary=summary
+    )

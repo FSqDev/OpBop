@@ -52,10 +52,7 @@ def shorten():
     returns:
         String maintext: shortened text
     """
-    return Response(
-        summarize(request.args.get("maintext")),
-        status=200, 
-        mimetype='application/json')
+    return summarize(request.args.get("maintext"))
 
 
 @app.route('/api/simplify', methods=['GET'])
