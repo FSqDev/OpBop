@@ -65,8 +65,10 @@ function populateSimplified(simiplifiedText) {
 function populateSimilarArticles(articles) {
     const similarArticleDiv = document.getElementById("nav-similar");
     similarArticleDiv.innerHTML = "";
+    let articleNumber = 0;
     articles.forEach((article) => {
         let articleWrapper = document.createElement("a")
+        articleWrapper.id = "article-" + articleNumber++;
         articleWrapper.setAttribute("href", article.url);
         let articleTile = document.createElement("div");
         articleTile.classList.add("article-tile")
@@ -83,7 +85,16 @@ function populateSimilarArticles(articles) {
         articleTile.appendChild(articleSource);
         articleWrapper.appendChild(articleTile)
         similarArticleDiv.appendChild(articleWrapper);
+
+        let similarArticle = document.getElementById(articleWrapper.id);
+        similarArticle.addEventListener("click", function () {
+            openUrl(article.url);
+        }, false);
     })
+}
+
+function openUrl(url) {
+    chrome.tabs.create({ url: url});
 }
 
 // Because comedy
