@@ -150,22 +150,25 @@ def do_the_thing():
 
     parsed = news_utils.parse_maintext_title(request.json["url"])
     maintext = parsed["maintext"]
-    summarized = summarize(maintext)
-
-    tldr = summarized["summary"]
-
-    reduction = summarized["reduction"]
-
-    simplified = openai.Completion.create(
-        engine='davinci-instruct-beta',
-        prompt=f"explain the following text in a way a second grader would understand:\n\\\n{maintext}\n",
-        temperature=0,
-        top_p=1.0,
-        frequency_penalty=0.0,
-        presence_penalty=0.0,
-        stop=["\"\"\""],
-        max_tokens=len(maintext.split())
-    )
+    tldr = summarize(maintext)
+    reduction = int(100 * (len(maintext) - len(tldr)) / len(maintext))
+    reduction = ""
+    while True:
+        try:
+            simplified = openai.Completion.create(
+                engine='davinci-instruct-beta',
+                prompt=f"explain the following text in a way a second grader would understand:\n\\\n{tldr}\n",
+                temperature=0,
+                top_p=1.0,
+                frequency_penalty=0.0,
+                presence_penalty=0.0,
+                stop=["\"\"\""],
+                max_tokens=len(tldr.split())
+            )
+            break
+        except openai.error.InvalidRequestError:
+            tldr = summarize(tldr)
+            reduction = int(100 * (len(maintext) - len(tldr)) / len(maintext))
 
     sensitivity = openai.Completion.create(
       engine="content-filter-alpha-c4",

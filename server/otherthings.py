@@ -43,7 +43,4 @@ def summarize(text: str) -> dict:
 
     summary_sents = nlargest(length, sent_score, key = sent_score.get)
     summary = ' '.join(summary_sents)
-    return {
-        "reduction": int(100 * (len(text) - len(summary)) / len(text)),
-        "summary": summary
-    }
+    return summary
