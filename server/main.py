@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from newsutils import NewsUtils
 from otherthings import summarize
 import openai
+from dotenv import load_dotenv
+from pprint import pprint
 
 app = Flask("app")
 news_utils = NewsUtils()
@@ -113,14 +115,14 @@ def simplify():
     )
 
     text_saftey = openai.Completion.create(
-      engine="content-filter-alpha-c4",
-      prompt = "<|endoftext|>"+text+"\n--\nLabel:",
-      temperature=0,
-      max_tokens=1,
-      top_p=1,
-      frequency_penalty=0,
-      presence_penalty=0,
-      logprobs=10
+        engine="content-filter-alpha-c4",
+        prompt = "<|endoftext|>"+text+"\n--\nLabel:",
+        temperature=0,
+        max_tokens=1,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        logprobs=10
     )
 
     return jsonify(
