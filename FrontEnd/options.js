@@ -61,12 +61,16 @@ function updateExplicitFiltering(value) {
 }
 
 function addToBlackList() {
-    let url = document.getElementById("blacklist-input").value;
+    let url = document.getElementById("blacklist-input").value.toLowerCase();
     chrome.storage.sync.get("blackList", (data) => {
-        if (!data.blackList.includes(url)) {
-            data.blackList.push(url);
-            chrome.storage.sync.set({blackList: data.blackList});
-            renderBlackList();
+        if (/^[A-z0-9]*\.[a-z]{2,3}$/.test(url)) {
+            if (!data.blackList.includes(url)) {
+                data.blackList.push(url);
+                chrome.storage.sync.set({blackList: data.blackList});
+                renderBlackList();
+            }
+        } else {
+            window.alert("Not valid url");
         }
     });
 }
