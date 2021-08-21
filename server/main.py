@@ -1,6 +1,7 @@
 # General
-from flask import Flask
+from flask import Flask, Response, request
 import os
+from summarize import summarize
 
 
 app = Flask("app")
@@ -51,7 +52,10 @@ def shorten():
     returns:
         String maintext: shortened text
     """
-    pass
+    return Response(
+        summarize(request.args.get("maintext")),
+        status=200, 
+        mimetype='application/json')
 
 
 @app.route('/api/simplify', methods=['GET'])
