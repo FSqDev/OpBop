@@ -2,6 +2,11 @@ import nltk
 import string
 from heapq import nlargest
 
+# write a function to summarize a body of text
+# it should take a string as input and return a string
+# summarizing the text
+
+
 def summarize(text: str) -> dict:
     length = int(round(text.count(".") / 5))
 
@@ -9,7 +14,7 @@ def summarize(text: str) -> dict:
     nopunc = [char for char in text if char not in string.punctuation]
     nopunc = ''.join(nopunc)
     # Remove stopwords
-    processed_text =[word for word in nopunc.split() if word.lower() not in nltk.corpus.stopwords.words('english')]
+    processed_text = [word for word in nopunc.split() if word.lower() not in nltk.corpus.stopwords.words('english')]
 
     # Create a dictionary to store word frequency
     word_freq = {}  
