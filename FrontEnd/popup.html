@@ -10,50 +10,48 @@
 
     <title>OpBop</title>
 </head>
-<body>
-<h1>OpBop
-    <button id="parse-button" type="button" class="btn btn-primary" style="float: right;">Parse</button>
-</h1>
-<h2>Simplifying news for you</h2>
 
-<nav>
-    <div class="nav nav-pills nav-justified" id="nav-tab" role="tablist">
-        <button class="nav-link active" id="tldr-tab" data-bs-toggle="tab" data-bs-target="#nav-tldr" type="button"
-                role="tab" aria-controls="nav-tldr" aria-selected="true">TL;DR
-        </button>
-        <button class="nav-link" id="simplification-tab" data-bs-toggle="tab" data-bs-target="#nav-simplification"
-                type="button" role="tab" aria-controls="nav-simplification" aria-selected="false">Simplification
-        </button>
-        <button class="nav-link" id="similar-tab" data-bs-toggle="tab" data-bs-target="#nav-similar" type="button"
-                role="tab" aria-controls="nav-similar" aria-selected="false">Similar Articles
-        </button>
+<body style="width: 300px;">
+    <img src="./images/logo.png" />
+    <h2><strong>Placeholder Slogan Here</strong></h2>
+    <div class="center">
+        <button id="parse-button" type="button" class="btn btn-primary"><b>Simplify!</b></button>
     </div>
-</nav>
-<div class="tab-content" id="nav-tabContent">
-    <div class="tab-pane fade show active" id="nav-tldr" role="tabpanel" aria-labelledby="tldr-tab">
-        <p id="tldr-text">
-            This is where the
-            tl;dr will be
-        </p>
-    </div>
-    <div class="tab-pane fade" id="nav-simplification" role="tabpanel" aria-labelledby="simplification-tab">
-        <p id="simplified-text">
-            This is where the highlighted text will appear as simplified text
-        </p>
-    </div>
-    <div class="tab-pane fade" id="nav-similar" role="tabpanel" aria-labelledby="similar-tab">
-        <ul id="related-articles">
-            <li>Related article <a href="https://www.google.ca">1</a></li>
-            <li>Related article <a href="https://www.youtube.com">2</a></li>
-            <li>Related article <a href="https://www.poplar.com">3</a></li>
-            <li>Related article <a href="https://opbop.herokuapp.com/">4</a></li>
-        </ul>
-    </div>
-</div>
 
-<script src="bootstrap-510-dist/js/bootstrap.min.js"></script>
-<script src="popup.js"></script>
+    <div id="parse-idle" hidden>
+        <img src="./images/loading.gif" />
+        <p id="loading-message"></p>
+    </div>
 
+    <div id="parsed-container" hidden>
+        <nav id="nav-navbar">
+            <div class="nav nav-pills nav-justified" id="nav-tab" role="tablist">
+                <button class="nav-link active" id="tldr-tab" data-bs-toggle="tab" data-bs-target="#nav-tldr" type="button"
+                        role="tab" aria-controls="nav-tldr" aria-selected="true"><b>Summary</b>
+                </button>
+                <button class="nav-link" id="simplification-tab" data-bs-toggle="tab" data-bs-target="#nav-simplification"
+                        type="button" role="tab" aria-controls="nav-simplification" aria-selected="false"><b>Simplification</b>
+                </button>
+                <button class="nav-link" id="similar-tab" data-bs-toggle="tab" data-bs-target="#nav-similar" type="button"
+                        role="tab" aria-controls="nav-similar" aria-selected="false"><b>More News</b>
+                </button>
+            </div>
+        </nav>
+
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-tldr" role="tabpanel" aria-labelledby="tldr-tab">
+                <p id="tldr-reduction"></p>
+                <p id="tldr-text"></p>
+            </div>
+            <div class="tab-pane fade" id="nav-simplification" role="tabpanel" aria-labelledby="simplification-tab">
+                <p id="simplified-text"></p>
+            </div>
+            <div class="tab-pane fade" id="nav-similar" role="tabpanel" aria-labelledby="similar-tab"></div>
+        </div>
+    </div>
+
+    <script src="bootstrap-510-dist/js/bootstrap.min.js"></script>
+    <script src="popup.js"></script>
 </body>
 
 </html>
