@@ -102,9 +102,7 @@ def simplify():
     text = request.json["maintext"]
 
     simplified = openai.Completion.create(
-        # engine='davinci',
         engine='davinci-instruct-beta',
-        # prompt=f"My second grader asked me what this passage means:\n\"\"\"\n{text}\n\"\"\"\nI rephrased it for him, in plain language a second grader can understand:\n\"\"\"\n",
         prompt=f"explain the following text in a way a second grader would understand:\n\\\n{text}\n",
         temperature=0,
         top_p=1.0,
@@ -157,9 +155,7 @@ def do_the_thing():
     reduction = summarized["reduction"]
 
     simplified = openai.Completion.create(
-        # engine='davinci',
         engine='davinci-instruct-beta',
-        # prompt=f"My second grader asked me what this passage means:\n\"\"\"\n{text}\n\"\"\"\nI rephrased it for him, in plain language a second grader can understand:\n\"\"\"\n",
         prompt=f"explain the following text in a way a second grader would understand:\n\\\n{maintext}\n",
         temperature=0,
         top_p=1.0,
@@ -189,6 +185,19 @@ def do_the_thing():
         "sensitivity": sensitivity["choices"][0]["text"],
         "articles": articles
     })
+
+
+# ========================================= BELOW IS TESTING/DEVELOPMENT APIS, NOT MEANT FOR ACTUAL USE =========================================
+@app.route('/api/openaikeychange', methods=['POST'])
+def openaikeychange():
+    """
+    Changes the API key so we can swap between accounts on prod
+    """
+    if "key" not in request.json:
+        return Response("Expected parameter 'key' in body", status=400)
+
+    openai.api_key = request.json["key"]
+    return Response("Success", status=200)
 
 
 @app.route('/api/dothethingdev', methods=['POST'])
