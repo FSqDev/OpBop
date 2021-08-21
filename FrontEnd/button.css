@@ -15,6 +15,18 @@ body > img {
   margin-bottom: 0.5em;
 }
 
+#options-icon {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  display: block !important;
+}
+
+#options-icon:hover {
+  border: 1px solid gray;
+  border-radius: 25%;
+}
+
 #nav-tabContent {
   margin-top: 0.5em;
 }

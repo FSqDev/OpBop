@@ -1,8 +1,14 @@
+// Api call params
+const basePath = 'https://opbop.herokuapp.com/'
+const apiPath = basePath + 'api/'
 
+const urls = {
+    banana : apiPath + 'banana',
+    main : apiPath + 'dothethingdev'
+}
 
+// Main function - parse and show
 let parseButton = document.getElementById("parse-button")
-
-// When the button is clicked, inject setPageBackgroundColor into current page
 parseButton.addEventListener("click", async () => {
     let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
     let url = tab.url;
@@ -42,6 +48,7 @@ function parse(url) {
     });
 }
 
+// Populate fields with API return
 function populateTldr(tldrText, reductionPercent) {
     let tldr = document.getElementById("tldr-text");
     tldr.innerHTML = tldrText;
@@ -79,15 +86,6 @@ function populateSimilarArticles(articles) {
     })
 }
 
-//api
-const basePath = 'https://opbop.herokuapp.com/'
-const apiPath = basePath + 'api/'
-
-const urls = {
-    banana : apiPath + 'banana',
-    main : apiPath + 'dothethingdev'
-}
-
 // Because comedy
 function getLoadingMessage () {
     let messages = [
@@ -121,3 +119,13 @@ function getLoadingMessage () {
     const random = Math.floor(Math.random() * messages.length);
     return messages[random];
 }
+
+// Options page button
+let optionsButton = document.getElementById("options-icon")
+optionsButton.addEventListener("click", () => {
+    if (chrome.runtime.openOptionsPage) {
+        chrome.runtime.openOptionsPage();
+    } else {
+        window.open(chrome.runtime.getURL('options.html'));
+    }
+});
