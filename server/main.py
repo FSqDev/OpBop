@@ -150,9 +150,21 @@ def do_the_thing():
         String simplified: simplified text
         String sensitivity: sensitive content flag
         List articles: similar articles
+        String warning: warning message if content is sensitive
     """
     if "url" not in request.json:
         return Response("Expected parameter 'url' in body", status=400)
+    if "articleRange" not in request.json:
+        return Response("Expected parameter 'articleRange' in body", status=400)
+    if "filterExplicit" not in request.json:
+        return Response("Expected parameter 'filterExplicit' in body", status=400) 
+
+    range = request.json["articleRange"]
+    
+    filterbaddybads = request.json["filterExplicit"].lower()
+    if filterbaddybads not in {"true", "false"}:
+        return Response("Expected filterExplicit to be bool", status=400)
+    filterbaddybads = True if filterbaddybads == "true" else False
 
     parsed = news_utils.parse_maintext_title(request.json["url"])
     maintext = parsed["maintext"]
@@ -171,10 +183,10 @@ def do_the_thing():
                 stop=["\"\"\""],
                 max_tokens=len(tldr.split())
             )
+            reduction = int(100 * ((len(maintext) - len(tldr)) / len(maintext)))
             break
         except openai.error.InvalidRequestError:
             tldr = summarize(tldr)
-            reduction = int(100 * (len(maintext) - len(tldr)) / len(maintext))
 
     sensitivity = openai.Completion.create(
       engine="content-filter-alpha-c4",
@@ -187,14 +199,21 @@ def do_the_thing():
       logprobs=10
     )
 
-    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), 0, [])
+    sens = sensitivity["choices"][0]["text"]
+
+    warning = None
+    if sens in {'1', '2'} and filterbaddybads:
+        warning = "This shit could be offensive"
+
+    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], [])
 
     return jsonify({
         "tldr": tldr,
         "reduction": reduction,
         "simplified": simplified['choices'][0]['text'],
-        "sensitivity": sensitivity["choices"][0]["text"],
-        "articles": articles
+        "sensitivity": sens,
+        "articles": articles,
+        "warning": warning
     })
 
 
