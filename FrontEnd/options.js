@@ -1,11 +1,17 @@
+// Similar articles components
 let articleRangeBefore = document.getElementById("article-range-before");
 let articleRangeAfter = document.getElementById("article-range-after");
+let articleDateFilters = document.getElementById("article-date-filters");
+let articleDateWarning = document.getElementById("article-date-warning");
 let enableDateFiltering = document.getElementById("should-filter-article-range");
-let enableExplicitFilter = document.getElementById("enable-explicit-filter");
 let blackListAddButton = document.getElementById("blacklist-add");
 
+// Sensitive content filter components
+let filterSlider = document.getElementById("filter-level")
+
+// Render page
 function initializeSimilarArticleRangeInput() {
-    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRangeBefore", "articleRangeAfter", "enableExplicitFiltering"], (data) => {
+    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRangeBefore", "articleRangeAfter", "filterLevel"], (data) => {
         let enableSimilarArticleFiltering = data.enableSimilarArticleFiltering;
         enableDateFiltering.checked = enableSimilarArticleFiltering;
         disableDateFiltering(enableSimilarArticleFiltering);
@@ -20,8 +26,16 @@ function initializeSimilarArticleRangeInput() {
             articleRangeAfter.value = afterDate;
         }
 
-        let enableExplicitFiltering = data.enableExplicitFiltering;
-        enableExplicitFilter.checked = enableExplicitFiltering;
+        checkArticleRangeValidity()
+
+        let filterLevel = data.filterLevel;
+        if (filterLevel != undefined) {
+            filterSlider.value = filterLevel;
+        } else {
+            filterSlider.value = "0";
+        }
+
+        updateFilterWarning()
 
         renderBlackList();
     });
@@ -29,37 +43,47 @@ function initializeSimilarArticleRangeInput() {
     articleRangeBefore.addEventListener('input', updateArticleRangeBeforeValue);
     articleRangeAfter.addEventListener('input', updateArticleRangeAfterValue);
     enableDateFiltering.addEventListener('input', updateEnableDateFiltering);
-    enableExplicitFilter.addEventListener('input', updateExplicitFiltering);
     blackListAddButton.addEventListener('click', addToBlackList)
-
+    filterSlider.addEventListener('input', updateExplicitFiltering);
 }
 
+// Article date filtering
 function updateEnableDateFiltering(value) {
     let enableSimilarArticleFiltering = value.target.checked;
     chrome.storage.sync.set({enableSimilarArticleFiltering});
     disableDateFiltering(enableSimilarArticleFiltering);
+    checkArticleRangeValidity()
 }
 
 function disableDateFiltering(enabled) {
-    articleRangeAfter.disabled = !enabled;
-    articleRangeBefore.disabled = !enabled;
+    if (!enabled) {
+        articleDateFilters.setAttribute("hidden", null);
+    } else {
+        articleDateFilters.removeAttribute("hidden");
+    }
 }
 
 function updateArticleRangeBeforeValue(value) {
     let date = value.target.value;
     chrome.storage.sync.set({articleRangeBefore: date});
+    checkArticleRangeValidity()
 }
 
 function updateArticleRangeAfterValue(value) {
     let date = value.target.value;
     chrome.storage.sync.set({articleRangeAfter: date});
+    checkArticleRangeValidity()
 }
 
-function updateExplicitFiltering(value) {
-    let enableExplicitFiltering = value.target.checked;
-    chrome.storage.sync.set({enableExplicitFiltering});
+function checkArticleRangeValidity() {
+    if (articleRangeBefore.value == "" || articleRangeAfter.value == "") {
+        articleDateWarning.removeAttribute("hidden");
+    } else {
+        articleDateWarning.setAttribute("hidden", null);
+    }
 }
 
+// Blacklist
 function addToBlackList() {
     let url = document.getElementById("blacklist-input").value.toLowerCase();
     chrome.storage.sync.get("blackList", (data) => {
@@ -70,7 +94,7 @@ function addToBlackList() {
                 renderBlackList();
             }
         } else {
-            window.alert("Not valid url");
+            window.alert("Not a valid url (formatting: \"opbop.com\")");
         }
     });
 }
@@ -107,6 +131,26 @@ function deleteBlackListEntry(id) {
         chrome.storage.sync.set({blackList: data.blackList});
         renderBlackList();
     });
+}
+
+// Content filtering
+function updateExplicitFiltering(value) {
+    let filterLevel = value.target.value;
+    chrome.storage.sync.set({filterLevel});
+    updateFilterWarning();
+}
+
+function updateFilterWarning() {
+    let filterWarning = document.getElementById("filter-description");
+
+    let filterLevel = filterSlider.value;
+    if (filterLevel == "0") {
+        filterWarning.innerHTML = "Let all content through, and parse (summarize and simplify) accordingly."
+    } else if (filterLevel == "1") {
+        filterWarning.innerHTML = "Block sensitive text and above (could be talking about something political, religious, or talking about a protected class)"
+    } else {
+        filterWarning.innerHTML = "Block unsafe text (profane language, prejudiced or hateful language, something that could be NSFW)"
+    }
 }
 
 initializeSimilarArticleRangeInput();
