@@ -42,6 +42,6 @@ def summarize(text: str) -> dict:
     summary_sents = nlargest(length, sent_score, key = sent_score.get)
     summary = ' '.join(summary_sents)
     return jsonify(
-        reduction=1 - len(summary) / len(text),
+        reduction=(len(text) - len(summary)) / len(text),
         summary=summary
     )
