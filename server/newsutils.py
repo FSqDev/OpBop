@@ -12,6 +12,8 @@ import math
 from newspaper import Article
 import requests
 import xml.etree.ElementTree as ET
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
 
 class NewsUtils:
     """ Class that handles fetching, parsing and searching of news articles for OpBop """
@@ -81,13 +83,22 @@ class NewsUtils:
         ret = []
 
         xml_root = ET.fromstring(self._load_rss(keywords, recency))
+        count = 0
         for child in xml_root[0]:
+            if count == NewsUtils.SIMILAR_ARTICLES:
+                break
             if child.tag == "item":
+                count += 1
+                webpage = urlopen(child[NewsUtils.RSS_INDEX["url"]].text).read()
+                soup = BeautifulSoup(webpage, "lxml")
+
                 ret.append({
                     "title": child[NewsUtils.RSS_INDEX["title"]].text,
                     "url": child[NewsUtils.RSS_INDEX["url"]].text,
+                    "image": soup.find("meta", property="og:image")["content"],
                     "source": child[NewsUtils.RSS_INDEX["source"]].text
                 })
+
         return ret
     
     def _load_rss(self, keywords: list, recency: int) -> str:
