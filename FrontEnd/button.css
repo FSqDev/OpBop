@@ -1,9 +1,101 @@
 body {
-  height: 500px;
-  width: 500px;
+  min-height: calc(110px + 13em);
   outline: none;
-  margin: 10px;
-  background: url(https://www.ppt-backgrounds.net/thumbs/neutral-texture-for-use-as-a-graphic-background-backgrounds.jpg);
+  padding: 25px;
+  border: 1px solid gray;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
+
+body > img {
+  height: 50px;
+  margin-bottom: 0.5em;
+}
+
+#nav-tabContent {
+  margin-top: 0.5em;
+}
+
+#parse-button > b {
+  font-size: 200%;
+}
+
+.tab-content > div {
+  height: 300px;
+  overflow: scroll;
+}
+
+#tldr-reduction {
+  text-align: center;
+  font-size: 75%;
+  color: gray;
+  margin-bottom: 0;
+}
+
+#parse-idle > img {
+  width: 100%;
+}
+
+#parse-idle > p {
+  text-align: center;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+
+.center {
+  margin: 0;
+  position: absolute;
+  bottom: 3em;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.article-tile {
+  float: left;
+  width: 48%;
+  height: 133px;
+  margin: 0.3em 1% 0.3em 1%;
+  border-radius: 10px;
+  border: 1px solid whitesmoke;
+  background-color: whitesmoke;
+}
+
+.article-tile:hover {
+  border: 1px solid black;
+}
+
+.article-tile > img {
+  height: 78px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+}
+
+.article-tile > div {
+  user-select: none;
+  width: 95%;
+  margin: 0 2.5% 0 2.5%;
+  color: black;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.article-tile > .article-title {
+  font-size: 85%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.article-tile > .article-source {
+  margin-top: 3px;
+  font-size: 75%;
+  font-weight: 650;
 }
 
 
@@ -19,18 +111,19 @@ h1 {
   font-weight: bolder;
 }
 
-h2, h3 {
-  color:brown;
+h2 {
+  color:black;
   size: 1px;
   font-size: 20px;
+  margin-bottom: 0.5em;
 }
 
 .nav-link {
-  color:chocolate;
+  color: black;
 }
 
 .nav-link:hover {
-  color: brown;
+  color: gray;
 }
 
  a {
@@ -43,8 +136,4 @@ a:hover {
 
 #parseButton {
   margin: 0.25em;
-}
-
-body {
-  padding: 5px;
 }
