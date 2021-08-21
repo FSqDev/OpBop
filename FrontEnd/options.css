@@ -90,8 +90,15 @@ button:hover{
 input[type=checkbox]:checked {
     background-color: #222;
     border-color: #222;
+    box-shadow: none;
 }
 
 input[type=checkbox]:hover {
     border-color: #222;
+    box-shadow: none;
+}
+
+input[type=checkbox]:focus {
+    border-color: #222;
+    box-shadow: none;
 }
