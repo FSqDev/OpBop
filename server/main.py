@@ -1,15 +1,15 @@
 # General
 from flask import Flask, Response, request, jsonify
 import os
+from dotenv import load_dotenv
 
 # Custom wrappers
 from newsutils import NewsUtils
 from otherthings import summarize
 import openai
-from dotenv import load_dotenv
 
 app = Flask("app")
-news_utils = NewsUtils(True)
+news_utils = NewsUtils()
 
 
 @app.route('/')
@@ -51,11 +51,22 @@ def find_similar():
 
     args:
         List[String] keywords: list of keywords to search
-        Int recency: max age (in days) of returned articles, -1 for any time
+        Int recency: max age (in days) of returned articles, 0 for any time
     returns:
         List[JSON] articles: similar articles (Title, URL, Source)
     """
-    pass
+    if "keywords" not in request.json:
+        return Response("Expected parameter 'keywords' in body", status=400)
+    if "recency" not in request.json:
+        return Response("Expected parameter 'recency' in body", status=400)
+    elif request.json["recency"] < 0:
+        return Response("Cannot have negative value for recency", status=400)
+
+    ret = news_utils.similar_articles(request.json["keywords"], request.json["recency"])
+
+    return jsonify({
+        "articles": ret
+    })
 
 
 @app.route('/api/shorten', methods=['POST'])
@@ -66,9 +77,12 @@ def shorten():
     args:
         String maintext: whatever text needs to be shortened
     returns:
-        String maintext: shortened text
+        String summary: shortened text
     """
-    return summarize(request.args.get("maintext"))
+    if "maintext" not in request.json:
+        return Response("Expected parameter 'maintext' in body", status=400)
+
+    return jsonify(summarize(request.json["maintext"]))
 
 
 @app.route('/api/simplify', methods=['POST'])
@@ -78,12 +92,14 @@ def simplify():
 
     args:
         String maintext: whatever text needs to be simplified
-        
     returns:
         String maintext: simplified text
         Int sensitivity: flag indicating sensitive content (0 none, 1 sensitive, 2 explicit)
     """
-    text = request.args.get("maintext")
+    if "maintext" not in request.json:
+        return Response("Expected parameter 'maintext' in body", status=400)
+
+    text = request.json["maintext"]
 
     simplified = openai.Completion.create(
         # engine='davinci',
@@ -115,20 +131,70 @@ def simplify():
     )
 
 
-
 @app.route('/api/dothething', methods=['POST'])
 def do_the_thing():
     """
     Basically every other API combined into one for 'internal' use
-    TODO
+
+    args:
+        String url: url of the webpage
+    returns:
+        String tldr: shortened text
+        Int reduction: percentage of reduction performed by tldr algorithm
+        String simplified: simplified text
+        Int sensitivity: sensitive content flag
+        List articles: similar articles
     """
-    pass
+    if "url" not in request.json:
+        return Response("Expected parameter 'url' in body", status=400)
+
+    parsed = news_utils.parse_maintext_title(request.json["url"])
+    maintext = parsed["maintext"]
+    summarized = summarize(maintext)
+
+    tldr = summarized["summary"]
+
+    reduction = summarized["reduction"]
+
+    simplified = openai.Completion.create(
+        # engine='davinci',
+        engine='davinci-instruct-beta',
+        # prompt=f"My second grader asked me what this passage means:\n\"\"\"\n{text}\n\"\"\"\nI rephrased it for him, in plain language a second grader can understand:\n\"\"\"\n",
+        prompt=f"explain the following text in a way a second grader would understand:\n\\\n{maintext}\n",
+        temperature=0,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
+        stop=["\"\"\""],
+        max_tokens=len(maintext.split())
+    )
+
+    sensitivity = openai.Completion.create(
+      engine="content-filter-alpha-c4",
+      prompt = "<|endoftext|>"+maintext+"\n--\nLabel:",
+      temperature=0,
+      max_tokens=1,
+      top_p=1,
+      frequency_penalty=0,
+      presence_penalty=0,
+      logprobs=10
+    )
+
+    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), 0)
+
+    return jsonify({
+        "tldr": tldr,
+        "reduction": reduction,
+        "simplified": simplified['choices'][0]['text'],
+        "sensitivity": sensitivity["choices"][0]["text"],
+        "articles": articles
+    })
 
 
 @app.route('/api/banana', methods=['POST'])
 def banana():
     """ 
-    Frontend request this
+    Frontend requested this??
     """
     return jsonify({
         "value": "banana"
