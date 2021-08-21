@@ -10,6 +10,9 @@ import openai
 from dotenv import load_dotenv
 from pprint import pprint
 
+# Debugging
+import time
+
 app = Flask("app")
 news_utils = NewsUtils()
 
@@ -207,6 +210,8 @@ def dothethingdev():
     """
     Testing endpoint for frontend, to prevent overuse of OpenAi tokens
     """
+    time.sleep(3)
+
     return jsonify({
     "articles": [
         {
