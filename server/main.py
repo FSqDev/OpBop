@@ -148,7 +148,7 @@ def simplify():
     )
 
 @app.route('/api/dothething', methods=['POST'])
-@cross_origin()
+# @cross_origin()
 def do_the_thing():
     """
     Basically every other API combined into one for 'internal' use
@@ -173,7 +173,7 @@ def do_the_thing():
     #     resp = Response("beep boop")
     #     resp.headers['Access-Control-Allow-Origin'] = '*'
     #     return resp
-    pprint(request.json)
+
     if "url" not in request.json:
         return Response("Expected parameter 'url' in body", status=400)
     if "articleRange" not in request.json or not request.json["articleRange"]:
@@ -196,7 +196,7 @@ def do_the_thing():
     # if checkReliable not in {"true", "false"}:
     #     return Response("Expected checkReliability to be bool", status=400)
     # checkReliable = True if checkReliable == "true" else False
-    print(range)
+
     parsed = news_utils.parse_maintext_title(request.json["url"])
     maintext = parsed["maintext"]
     tldr = summarize(maintext)
@@ -238,16 +238,6 @@ def do_the_thing():
     censored = False
     if filterbaddybads < int(sens):
         censored = True
-        if sens == "1":
-            warning = (
-                "This article contains potentially sensitive topics, "
-                "eg. political, religious or race related content."
-            )
-        elif sens == "2":
-            warning = (
-                "This article contains unsafe content, "
-                "eg. profane/prejudice language."
-            )
 
     articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], request.json["blacklist"])
 
@@ -265,9 +255,9 @@ def do_the_thing():
     #     reliable = True if "yes" in reliable else False
 
     return jsonify({
-        "tldr": tldr if warning == "" else warning,
+        "tldr": tldr,
         "reduction": reduction,
-        "simplified": simplified['choices'][0]['text'] if warning == "" else warning,
+        "simplified": simplified['choices'][0]['text'],
         "sensitivity": sens,
         "articles": articles,
         "censored": censored
