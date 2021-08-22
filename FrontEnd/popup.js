@@ -1,6 +1,5 @@
 // Api call params
-// const basePath = 'https://opbop.herokuapp.com/'
-const basePath = 'http://127.0.0.1:5000/'
+const basePath = 'https://opbop.herokuapp.com/'
 const apiPath = basePath + 'api/'
 
 const urls = {
