@@ -1,5 +1,6 @@
 # General
 from flask import Flask, Response, request, jsonify
+from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 
@@ -13,10 +14,19 @@ import re
 
 # Debugging
 import time
+from flask_cors import CORS, cross_origin
 
 app = Flask("app")
+app.debug = True
 news_utils = NewsUtils()
+cors = CORS(app)
 
+# @app.after_request
+# def after_request(response):
+#     response.headers.add('Access-Control-Allow-Origin', '*')
+#     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+#     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+#     return response
 
 @app.route('/')
 def home():
@@ -137,8 +147,8 @@ def simplify():
         sensitivity=text_saftey["choices"][0]["text"]
     )
 
-
 @app.route('/api/dothething', methods=['POST'])
+@cross_origin()
 def do_the_thing():
     """
     Basically every other API combined into one for 'internal' use
@@ -157,10 +167,15 @@ def do_the_thing():
         String sensitivity: sensitive content flag
         List articles: similar articles
     """
-    range = None
+    # if request.method == 'OPTIONS':
+    #     print("FUCK")
+    #     resp = Response("beep boop")
+    #     resp.headers['Access-Control-Allow-Origin'] = '*'
+    #     return resp
+    pprint(request.json)
     if "url" not in request.json:
         return Response("Expected parameter 'url' in body", status=400)
-    if "articleRange" not in request.json:
+    if "articleRange" not in request.json or not request.json["articleRange"]:
         range = {
             "from": "2020-08-21",
             "to": "2021-08-21"
@@ -173,14 +188,14 @@ def do_the_thing():
         return Response("Invalid parameter: Filter level should be one of 0, 1, or 2", status=400)
     if "blacklist" not in request.json:
         return Response("Expected parameter 'blacklist' in body", status=400)
-
-    range = request.json["articleRange"]
+    # if "checkReliability" not in request.json:
+    #     return Response("Expected parameter 'checkReliability' in body", status=400)
 
     # checkReliable = request.json["checkReliability"].lower()
     # if checkReliable not in {"true", "false"}:
     #     return Response("Expected checkReliability to be bool", status=400)
     # checkReliable = True if checkReliable == "true" else False
-
+    print(range)
     parsed = news_utils.parse_maintext_title(request.json["url"])
     maintext = parsed["maintext"]
     tldr = summarize(maintext)
@@ -197,7 +212,7 @@ def do_the_thing():
                 frequency_penalty=0.0,
                 presence_penalty=0.0,
                 stop=["\"\"\""],
-                # max_tokens=len(tldr.split())
+                max_tokens=len(tldr.split())
             )
             reduction = int(100 * ((len(maintext) - len(tldr)) / len(maintext)))
             break

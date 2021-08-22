@@ -36,7 +36,7 @@ function parse(url) {
                         to: data.articleRangeBefore
                     } : null,
                     filterExplicit: data.filterLevel == undefined ? "0" : data.filterLevel,
-                    blackList: data.blackList == undefined ? [] : data.blackList
+                    blacklist: data.blackList == undefined ? [] : data.blackList
                 })
             }
         ).then(function (res) {
