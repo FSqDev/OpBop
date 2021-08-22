@@ -145,11 +145,11 @@ function updateFilterWarning() {
 
     let filterLevel = filterSlider.value;
     if (filterLevel == "0") {
-        filterWarning.innerHTML = "Let all content through, and parse (summarize and simplify) accordingly."
+        filterWarning.innerHTML = "Block unsafe text (profane language, prejudiced or hateful language, something that could be NSFW)"
     } else if (filterLevel == "1") {
         filterWarning.innerHTML = "Block sensitive text and above (could be talking about something political, religious, or talking about a protected class)"
     } else {
-        filterWarning.innerHTML = "Block unsafe text (profane language, prejudiced or hateful language, something that could be NSFW)"
+        filterWarning.innerHTML = "Let all content through, and parse (summarize and simplify) accordingly."
     }
 }
 
