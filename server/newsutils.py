@@ -1,5 +1,6 @@
 # Keywords - nltk
 import nltk
+from requests.models import HTTPError
 nltk.download('stopwords')
 nltk.download('punkt')
 from nltk import tokenize
@@ -90,26 +91,30 @@ class NewsUtils:
                 break
             if child.tag == "item":
                 url = child[NewsUtils.RSS_INDEX["url"]].text
-                webpage = urlopen(url).read()
-                soup = BeautifulSoup(webpage, "lxml")
+                try:
+                    webpage = urlopen(url).read()
 
-                img = soup.find("meta", property="og:image")
-                if img is None:
-                    img = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png"
-                else:
-                    img = img["content"]
+                    soup = BeautifulSoup(webpage, "lxml")
 
-                if urlparse(url).netloc.strip("www.") in blacklist:
+                    img = soup.find("meta", property="og:image")
+                    if img is None:
+                        img = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png"
+                    else:
+                        img = img["content"]
+
+                    if urlparse(url).netloc.strip("www.") in blacklist:
+                        pass
+                    else:
+                        count += 1
+                        ret.append({
+                            "title": child[NewsUtils.RSS_INDEX["title"]].text,
+                            "url": url,
+                            "image": img,
+                            "source": child[NewsUtils.RSS_INDEX["source"]].text
+                        })
+
+                except HTTPError:
                     pass
-                else:
-                    count += 1
-                    ret.append({
-                        "title": child[NewsUtils.RSS_INDEX["title"]].text,
-                        "url": url,
-                        "image": img,
-                        "source": child[NewsUtils.RSS_INDEX["source"]].text
-                    })
-
         return ret
     
     def _load_rss(self, keywords: list, fromm, to) -> str:
