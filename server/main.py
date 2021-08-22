@@ -3,13 +3,13 @@ from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
+import tldextract
 
 # Custom wrappers
 from newsutils import NewsUtils
 from otherthings import summarize, load_reliability_data
 import openai
-from dotenv import load_dotenv
-import tldextract
+from db import OpBopDb
 
 # Debugging
 import time
@@ -20,6 +20,7 @@ app.debug = True
 cors = CORS(app)
 news_utils = NewsUtils()
 reliability_data = load_reliability_data()
+dao = OpBopDb()
 
 
 @app.route('/')
@@ -142,6 +143,84 @@ def simplify():
     )
 
 
+@app.route('/api/findcached', methods=['POST'])
+def find_cached():
+    """
+    Searches for cached version of an article, given a url
+    Returns basic 200 if not found
+
+    args:
+        String url: url of the webpage
+    returns:
+        String tldr: shortened text
+        Int reduction: percentage of reduction performed by tldr algorithm
+        String simplified: simplified text
+        String sensitivity: sensitive content flag
+        List articles: similar articles
+        String reliability: one of [unknown, high, mixed, low] representing source's factuality
+    """
+    if dao.db is None:
+        return Response("Reset the API keys", status=400)
+
+    if "url" not in request.json:
+        return Response("Expected parameter 'url' in body", status=400)
+    
+    ret = dao.find_by_url(request.json["url"])
+    if ret is None:
+        return Response("Not cached", status=200)
+    else:
+        return jsonify(ret)
+
+
+@app.route('/api/addtocache', methods=['POST'])
+def add_to_cache():
+    """
+    Adds the article to the cache
+
+    args:
+        String url: the url of the website
+        String tldr: shortened text
+        Int reduction: percentage of reduction performed by tldr algorithm
+        String simplified: simplified text
+        String sensitivity: sensitive content flag
+        List articles: similar articles
+        String reliability: one of [unknown, high, mixed, low] representing source's factuality
+    returns:
+        None
+    """
+    if dao.db is None:
+        return Response("Reset the API keys", status=400)
+
+    if "url" not in request.json:
+        return Response("Expected parameter 'url' in body", status=400)
+    if "tldr" not in request.json:
+        return Response("Expected parameter 'tldr' in body", status=400)
+    if "reduction" not in request.json:
+        return Response("Expected parameter 'reduction' in body", status=400)
+    if "simplified" not in request.json:
+        return Response("Expected parameter 'simplified' in body", status=400)
+    if "sensitivity" not in request.json:
+        return Response("Expected parameter 'sensitivity' in body", status=400)
+    elif request.json["sensitivity"] not in ["0", "1", "2"]:
+        return Response("Invalid parameter: Sensitivity should be one of 0, 1, or 2", status=400)
+    if "articles" not in request.json:
+        return Response("Expected parameter 'articles' in body", status=400)
+    if "reliability" not in request.json:
+        return Response("Expected parameter 'reliability' in body", status=400)
+
+    dao.insert_article({
+        "url": request.json["url"].lower(),
+        "tldr": request.json["tldr"],
+        "reduction": request.json["reduction"],
+        "simplified": request.json["simplified"],
+        "sensitivity": request.json["sensitivity"],
+        "articles": request.json["articles"],
+        "reliability": request.json["reliability"]
+    })
+
+    return Response("Success", status=200)
+
+
 @app.route('/api/dothething', methods=['POST'])
 def do_the_thing():
     """
@@ -163,6 +242,9 @@ def do_the_thing():
         Bool censored: whether or not the return content was censored by filter level
         String reliability: one of [unknown, high, mixed, low] representing source's factuality
     """
+    if dao.db is None:
+        return Response("Reset the API keys", status=400)
+
     # Request body validation
     if "url" not in request.json:
         return Response("Expected parameter 'url' in body", status=400)
@@ -179,6 +261,19 @@ def do_the_thing():
         return Response("Invalid parameter: Filter level should be one of 0, 1, or 2", status=400)
     if "blacklist" not in request.json:
         return Response("Expected parameter 'blacklist' in body", status=400)
+
+    # Check cache, return if found
+    ret = dao.find_by_url(request.json["url"])
+    if ret is not None:
+        return jsonify({
+        "tldr": ret["tldr"],
+        "reduction": ret["reduction"],
+        "simplified": ret["simplified"],
+        "sensitivity": ret["sensitivity"],
+        "articles": ret["articles"],
+        "censored": (int(request.json["filterExplicit"]) < int(ret["sensitivity"])),
+        "reliability": ret["reliability"]
+    })
 
     # Parse article
     parsed = news_utils.parse_maintext_title(request.json["url"])
@@ -247,11 +342,23 @@ def do_the_thing():
     except KeyError:
         do_be_reliable = "unknown"
 
-    # Ret
+    # Add to cache and return
+    simplified = simplified['choices'][0]['text'].strip("\n")
+
+    dao.insert_article({
+        "url": request.json["url"].lower(),
+        "tldr": tldr,
+        "reduction": reduction,
+        "simplified": simplified,
+        "sensitivity": sens,
+        "articles": articles,
+        "censored": censored,
+        "reliability": do_be_reliable
+    })
     return jsonify({
         "tldr": tldr,
         "reduction": reduction,
-        "simplified": simplified['choices'][0]['text'].strip("\n"),
+        "simplified": simplified,
         "sensitivity": sens,
         "articles": articles,
         "censored": censored,
@@ -260,20 +367,25 @@ def do_the_thing():
 
 
 # ========================================= BELOW IS TESTING/DEVELOPMENT APIS, NOT MEANT FOR ACTUAL USE =========================================
-@app.route('/api/openaikeychange', methods=['POST'])
+@app.route('/api/apikeychange', methods=['POST'])
 def openaikeychange():
     """
     Changes the API key so we can swap between accounts on prod
 
     args:
-        String key: OpenAI API key
+        String openai: OpenAI API key
+        String mongo: MongoDB URI
     returns:
         "Success"
     """
-    if "key" not in request.json:
-        return Response("Expected parameter 'key' in body", status=400)
+    if "openai" not in request.json:
+        return Response("Expected parameter 'openai' in body", status=400)
+    if "mongo" not in request.json:
+        return Response("Expected parameter 'mongo' in body", status=400)
 
-    openai.api_key = request.json["key"]
+    openai.api_key = request.json["openai"]
+    dao.reset_db(request.json["mongo"])
+
     return Response("Success", status=200)
 
 
