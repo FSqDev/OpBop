@@ -204,7 +204,7 @@ def do_the_thing():
     reduction = ""
     while True:
         try:
-            print("FUCK")
+            # print("FUCK")
             simplified = openai.Completion.create(
                 engine='davinci-instruct-beta',
                 prompt=f"explain the following text in a way a second grader would understand:\n\\\n{tldr}\n",
