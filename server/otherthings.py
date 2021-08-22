@@ -8,7 +8,7 @@ from heapq import nlargest
 
 
 def summarize(text: str) -> dict:
-    dick = 10 if text.count(".") > 20 else 5
+    dick = 10 if text.count(".") > 10 else 5
     length = int(round(text.count(".") / dick))
 
     # Remove punctuation
