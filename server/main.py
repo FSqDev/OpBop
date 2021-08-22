@@ -66,7 +66,7 @@ def find_similar():
     if "recency" not in request.json:
         return Response("Expected parameter 'recency' in body", status=400)
     elif request.json["recency"] < 0:
-        return Response("Cannot have negative value for recency", status=400)
+        return Response("Invalid parameter: Cannot have negative value for recency", status=400)
     if "blacklist" not in request.json:
         return Response("Expected parameter 'blacklist' in body", status=400)
 
@@ -144,27 +144,30 @@ def do_the_thing():
 
     args:
         String url: url of the webpage
+        JSON ArticleRange:
+            from String: ISO8601 Date, earliest publication date
+            to String: ISO8601 Date, latest publication date
+        String filterExplicit: maximum sensitivity tolerance of userm 0~2 as string
+        List[String] blacklist: list of blacklisted sites for article suggestions
     returns:
         String tldr: shortened text
         Int reduction: percentage of reduction performed by tldr algorithm
         String simplified: simplified text
         String sensitivity: sensitive content flag
         List articles: similar articles
-        String warning: warning message if content is sensitive
     """
     if "url" not in request.json:
         return Response("Expected parameter 'url' in body", status=400)
     if "articleRange" not in request.json:
         return Response("Expected parameter 'articleRange' in body", status=400)
     if "filterExplicit" not in request.json:
-        return Response("Expected parameter 'filterExplicit' in body", status=400) 
+        return Response("Expected parameter 'filterExplicit' in body", status=400)
+    elif request.json["filterExplicit"] not in ["0", "1", "2"]:
+        return Response("Invalid parameter: Filter level should be one of 0, 1, or 2", status=400)
+    if "blacklist" not in request.json:
+        return Response("Expected parameter 'blacklist' in body", status=400)
 
     range = request.json["articleRange"]
-    
-    filterbaddybads = request.json["filterExplicit"].lower()
-    if filterbaddybads not in {"true", "false"}:
-        return Response("Expected filterExplicit to be bool", status=400)
-    filterbaddybads = True if filterbaddybads == "true" else False
 
     parsed = news_utils.parse_maintext_title(request.json["url"])
     maintext = parsed["maintext"]
@@ -200,13 +203,14 @@ def do_the_thing():
     )
 
     sens = sensitivity["choices"][0]["text"]
+    filterbaddybads = int(request.json["filterExplicit"])
 
-    warning = None
-    if filterbaddybads:
+    warning = ""
+    if filterbaddybads < int(sens):
         if sens == "1":
             warning = (
                 "This article contains potentially sensitive topics, "
-                "eg. policitcal, religious or race related content."
+                "eg. political, religious or race related content."
             )
         elif sens == "2":
             warning = (
@@ -217,12 +221,11 @@ def do_the_thing():
     articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], [])
 
     return jsonify({
-        "tldr": tldr,
+        "tldr": tldr if warning == "" else warning,
         "reduction": reduction,
-        "simplified": simplified['choices'][0]['text'],
+        "simplified": simplified['choices'][0]['text'] if warning == "" else warning,
         "sensitivity": sens,
-        "articles": articles,
-        "warning": warning
+        "articles": articles
     })
 
 
