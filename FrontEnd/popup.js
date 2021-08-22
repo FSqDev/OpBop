@@ -43,7 +43,7 @@ function parse(url) {
             res.json().then(function(data) {
                 populateTldr(data.tldr, data.reduction);
                 populateSimplified(data.simplified);
-                populateSimilarArticles(data.articles);
+                populateSimilarArticles(data.articles, data.censored);
                 document.body.style.width = "500px"; // TODO: smooth this transition
                 document.getElementById("parse-idle").setAttribute("hidden", null)
                 document.getElementById("parsed-container").removeAttribute("hidden")
@@ -66,7 +66,7 @@ function populateSimplified(simiplifiedText) {
     simplified.innerText = simiplifiedText;
 }
 
-function populateSimilarArticles(articles) {
+function populateSimilarArticles(articles, censorImages) {
     const similarArticleDiv = document.getElementById("nav-similar");
     similarArticleDiv.innerHTML = "";
     let articleNumber = 0;
@@ -77,7 +77,13 @@ function populateSimilarArticles(articles) {
         let articleTile = document.createElement("div");
         articleTile.classList.add("article-tile")
         let articleImg = document.createElement("img");
-        articleImg.setAttribute("src", article.image);
+        chrome.storage.sync.get("censorImages", (data) => {
+            if (data.censorImages && censorImages) {
+                articleImg.setAttribute("src", article.image);
+            } {
+                articleImg.setAttribute("src", getPlaceHolderImage())
+            }
+        })
         articleTile.appendChild(articleImg);
         let articleTitle = document.createElement("div");
         articleTitle.classList.add("article-title")
@@ -144,3 +150,15 @@ optionsButton.addEventListener("click", () => {
         window.open(chrome.runtime.getURL('options.html'));
     }
 });
+
+function getPlaceHolderImage() {
+    let images = [
+        "./images/egguana.jpg",
+        "./images/gatsby.jpg",
+        "./images/lion_cat.jpg",
+        "./images/stitch.jpg"
+    ]
+
+    const random = Math.floor(Math.random() * images.length);
+    return images[random];
+}

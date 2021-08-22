@@ -5,13 +5,14 @@ let articleDateFilters = document.getElementById("article-date-filters");
 let articleDateWarning = document.getElementById("article-date-warning");
 let enableDateFiltering = document.getElementById("should-filter-article-range");
 let blackListAddButton = document.getElementById("blacklist-add");
+let censorImageCheckbox = document.getElementById("censor-images");
 
 // Sensitive content filter components
 let filterSlider = document.getElementById("filter-level")
 
 // Render page
-function initializeSimilarArticleRangeInput() {
-    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRangeBefore", "articleRangeAfter", "filterLevel"], (data) => {
+function initializeOptions() {
+    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRangeBefore", "articleRangeAfter", "filterLevel", "censorImages"], (data) => {
         let enableSimilarArticleFiltering = data.enableSimilarArticleFiltering;
         enableDateFiltering.checked = enableSimilarArticleFiltering;
         disableDateFiltering(enableSimilarArticleFiltering);
@@ -35,6 +36,8 @@ function initializeSimilarArticleRangeInput() {
             filterSlider.value = "0";
         }
 
+        censorImageCheckbox.checked = data.censorImages;
+
         updateFilterWarning()
 
         renderBlackList();
@@ -45,6 +48,7 @@ function initializeSimilarArticleRangeInput() {
     enableDateFiltering.addEventListener('input', updateEnableDateFiltering);
     blackListAddButton.addEventListener('click', addToBlackList)
     filterSlider.addEventListener('input', updateExplicitFiltering);
+    censorImageCheckbox.addEventListener('input', updateCensorImages);
 }
 
 // Article date filtering
@@ -153,4 +157,9 @@ function updateFilterWarning() {
     }
 }
 
-initializeSimilarArticleRangeInput();
+function updateCensorImages(value) {
+    let censorImages = value.target.checked;
+    chrome.storage.sync.set({ censorImages })
+}
+
+initializeOptions();
