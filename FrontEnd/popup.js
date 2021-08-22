@@ -21,7 +21,7 @@ function parse(url) {
     document.body.style.paddingBottom = "5px";
     document.getElementById("loading-message").innerHTML = getLoadingMessage();
     document.getElementById("parse-idle").removeAttribute("hidden")
-    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRange", "enableExplicitFiltering", "blackList"], data => {
+    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRangeBefore", "articleRangeAfter", "enableExplicitFiltering", "blackList", "filterLevel"], data => {
         fetch(urls.main,
             {
                 method: "post",
@@ -31,9 +31,12 @@ function parse(url) {
                 },
                 body: JSON.stringify({
                     url: url,
-                    articleRange: data.articleRange ? data.articleRange : null,
-                    filterExplicit: data.enableExplicitFiltering == null ? false : data.enableExplicitFiltering,
-                    blackList: data.blackList == null ? [] : data.blackList
+                    articleRange: data.enableSimilarArticleFiltering ? {
+                        from: data.articleRangeAfter,
+                        to: data.articleRangeBefore
+                    } : null,
+                    filterExplicit: data.filterLevel == undefined ? "0" : data.filterLevel,
+                    blackList: data.blackList == undefined ? [] : data.blackList
                 })
             }
         ).then(function (res) {
