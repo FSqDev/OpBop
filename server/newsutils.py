@@ -1,11 +1,9 @@
 # Keywords - nltk
 import nltk
-from requests.models import HTTPError
 nltk.download('stopwords')
 nltk.download('punkt')
 from nltk import tokenize
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 # Keywords - other
 from operator import itemgetter
 import math
@@ -15,6 +13,7 @@ import requests
 import xml.etree.ElementTree as ET
 from urllib.request import urlopen
 from urllib.parse import urlparse
+from urllib.error import HTTPError
 from bs4 import BeautifulSoup
 
 class NewsUtils:
