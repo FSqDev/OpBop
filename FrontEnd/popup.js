@@ -1,6 +1,6 @@
 // Api call params
-const basePath = 'https://opbop.herokuapp.com/'
-// const basePath = 'http://127.0.0.1:5000/'
+// const basePath = 'https://opbop.herokuapp.com/'
+const basePath = 'http://127.0.0.1:5000/'
 const apiPath = basePath + 'api/'
 
 const urls = {
@@ -55,10 +55,13 @@ function parse(url) {
                 document.getElementById("error-image").setAttribute("src", "https://http.cat/" + res.status + ".jpg")
                 document.getElementById("error-div").removeAttribute("hidden")
             }
+        }).catch((err) => {
+            document.getElementById("parse-idle").setAttribute("hidden", null)
+            document.getElementById("error-image").setAttribute("src", "https://http.cat/" + 418 + ".jpg")
+            document.getElementById("error-div").removeAttribute("hidden")
         });
     });
 }
-
 // Populate fields with API return
 function populateTldr(tldrText, reductionPercent) {
     let tldr = document.getElementById("tldr-text");
@@ -142,6 +145,7 @@ function getLoadingMessage () {
         "Updating Updater...",
         "Work, work...",
         "Feeding unicorns...",
+        "Stealing ur personal info"
     ];
 
     const random = Math.floor(Math.random() * messages.length);
