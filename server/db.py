@@ -33,7 +33,6 @@ class OpBopDb:
         self.db.db["articles"].insert_one({
             "url": article["url"],
             "tldr": article["tldr"],
-            "articles": article["articles"],
             "reduction": article["reduction"],
             "simplified": article["simplified"],
             "sensitivity": article["sensitivity"],

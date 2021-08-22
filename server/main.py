@@ -156,7 +156,6 @@ def find_cached():
         Int reduction: percentage of reduction performed by tldr algorithm
         String simplified: simplified text
         String sensitivity: sensitive content flag
-        List articles: similar articles
         String reliability: one of [unknown, high, mixed, low] representing source's factuality
     """
     if dao.db is None:
@@ -183,7 +182,6 @@ def add_to_cache():
         Int reduction: percentage of reduction performed by tldr algorithm
         String simplified: simplified text
         String sensitivity: sensitive content flag
-        List articles: similar articles
         String reliability: one of [unknown, high, mixed, low] representing source's factuality
     returns:
         None
@@ -214,7 +212,6 @@ def add_to_cache():
         "reduction": request.json["reduction"],
         "simplified": request.json["simplified"],
         "sensitivity": request.json["sensitivity"],
-        "articles": request.json["articles"],
         "reliability": request.json["reliability"]
     })
 
@@ -265,12 +262,15 @@ def do_the_thing():
     # Check cache, return if found
     ret = dao.find_by_url(request.json["url"])
     if ret is not None:
+        parsed = news_utils.parse_maintext_title(request.json["url"])
+        articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], request.json["blacklist"])
+
         return jsonify({
         "tldr": ret["tldr"],
         "reduction": ret["reduction"],
         "simplified": ret["simplified"],
         "sensitivity": ret["sensitivity"],
-        "articles": ret["articles"],
+        "articles": articles,
         "censored": (int(request.json["filterExplicit"]) < int(ret["sensitivity"])),
         "reliability": ret["reliability"]
     })
