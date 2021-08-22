@@ -23,6 +23,7 @@ body {
 
 h1 {
     text-align: center;
+    color:black;
 }
 
 h2 {
@@ -133,4 +134,9 @@ input[type=checkbox]:hover {
 input[type=checkbox]:focus {
     border-color: #222;
     box-shadow: none;
+}
+
+img {
+    width: 128px;
+    height: 128px;
 }
