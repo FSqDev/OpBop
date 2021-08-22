@@ -1,6 +1,6 @@
 // Api call params
 // const basePath = 'https://opbop.herokuapp.com/'
-const basePath = 'http://127.0.0.1:5000/'
+const basePath = 'http://184.146.22.108:5000/'
 const apiPath = basePath + 'api/'
 
 const urls = {
@@ -92,7 +92,8 @@ function populateTldr(tldrText, reductionPercent, sensitivity, censored, reliabi
 function populateSimplified(simiplifiedText, sensitivity, censored, reliability) {
     let simplified = document.getElementById("simplified-text");
     chrome.storage.sync.get("disableReliabilityWarning", (data) => {
-        if (!censored && !(reliability === "mixed" || reliability === "low")) {
+        let showReliabilityWarning = !data.disableReliabilityWarning && (reliability === "mixed" || reliability === "low")
+        if (!censored && !showReliabilityWarning) {
             simplified.innerText = simiplifiedText;
         } else {
 
