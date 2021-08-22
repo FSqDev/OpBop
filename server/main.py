@@ -166,6 +166,7 @@ def do_the_thing():
         String simplified: simplified text
         String sensitivity: sensitive content flag
         List articles: similar articles
+        Bool censored: whether or not the return content was censored by filter level
     """
     # if request.method == 'OPTIONS':
     #     print("FUCK")
@@ -234,7 +235,9 @@ def do_the_thing():
     filterbaddybads = int(request.json["filterExplicit"])
 
     warning = ""
+    censored = False
     if filterbaddybads < int(sens):
+        censored = True
         if sens == "1":
             warning = (
                 "This article contains potentially sensitive topics, "
@@ -266,7 +269,8 @@ def do_the_thing():
         "reduction": reduction,
         "simplified": simplified['choices'][0]['text'] if warning == "" else warning,
         "sensitivity": sens,
-        "articles": articles
+        "articles": articles,
+        "censored": censored
     })
 
 
