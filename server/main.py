@@ -9,19 +9,18 @@ from newsutils import NewsUtils
 from otherthings import summarize, load_reliability_data
 import openai
 from dotenv import load_dotenv
-from pprint import pprint
 import tldextract
 
 # Debugging
 import time
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 app = Flask("app")
 app.debug = True
-news_utils = NewsUtils()
 cors = CORS(app)
-
+news_utils = NewsUtils()
 reliability_data = load_reliability_data()
+
 
 @app.route('/')
 def home():
@@ -142,8 +141,8 @@ def simplify():
         sensitivity=text_saftey["choices"][0]["text"]
     )
 
+
 @app.route('/api/dothething', methods=['POST'])
-# @cross_origin()
 def do_the_thing():
     """
     Basically every other API combined into one for 'internal' use
@@ -162,13 +161,9 @@ def do_the_thing():
         String sensitivity: sensitive content flag
         List articles: similar articles
         Bool censored: whether or not the return content was censored by filter level
+        String reliability: one of [unknown, high, mixed, low] representing source's factuality
     """
-    # if request.method == 'OPTIONS':
-    #     print("FUCK")
-    #     resp = Response("beep boop")
-    #     resp.headers['Access-Control-Allow-Origin'] = '*'
-    #     return resp
-
+    # Request body validation
     if "url" not in request.json:
         return Response("Expected parameter 'url' in body", status=400)
     if "articleRange" not in request.json or not request.json["articleRange"]:
@@ -184,22 +179,16 @@ def do_the_thing():
         return Response("Invalid parameter: Filter level should be one of 0, 1, or 2", status=400)
     if "blacklist" not in request.json:
         return Response("Expected parameter 'blacklist' in body", status=400)
-    # if "checkReliability" not in request.json:
-    #     return Response("Expected parameter 'checkReliability' in body", status=400)
 
-    # checkReliable = request.json["checkReliability"].lower()
-    # if checkReliable not in {"true", "false"}:
-    #     return Response("Expected checkReliability to be bool", status=400)
-    # checkReliable = True if checkReliable == "true" else False
-
+    # Parse article
     parsed = news_utils.parse_maintext_title(request.json["url"])
     maintext = parsed["maintext"]
     tldr = summarize(maintext)
-    reduction = int(100 * (len(maintext) - len(tldr)) / len(maintext))
+
+    # Simplification, further summarization if needed
     reduction = ""
     while True:
         try:
-            # print("FUCK")
             simplified = openai.Completion.create(
                 engine='davinci-instruct-beta',
                 prompt=f"explain the following text in a way a second grader would understand:\n\\\n{tldr}\n",
@@ -214,6 +203,8 @@ def do_the_thing():
             break
         except openai.error.InvalidRequestError:
             tldr = summarize(tldr)
+
+    # Content filter
     sensitivity = None
     t = maintext
     try:
@@ -239,30 +230,16 @@ def do_the_thing():
             presence_penalty=0,
             logprobs=10
         )
-
     sens = sensitivity["choices"][0]["text"]
     filterbaddybads = int(request.json["filterExplicit"])
-
-    warning = ""
     censored = False
     if filterbaddybads < int(sens):
         censored = True
 
+    # Similar articles
     articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], request.json["blacklist"])
 
-    # reliable = None
-    # if checkReliable:
-    #     reliable = openai.Completion.create(
-    #         engine='davinci-instruct-beta',
-    #         prompt=(
-    #             "Give me a one word yes or no answer to this question:\n\n"
-    #             "Is this news article reliable?\n\n"
-    #             f"{request.json['url']}"
-    #         )
-    #     )['choices'][0]['text'].lower()
-    #     print(reliable)
-    #     reliable = True if "yes" in reliable else False
-
+    # Reliability
     try:
         do_be_reliable = reliability_data[
             '.'.join(tldextract.extract(request.json['url'])[1:])
@@ -270,10 +247,11 @@ def do_the_thing():
     except KeyError:
         do_be_reliable = "unknown"
 
+    # Ret
     return jsonify({
         "tldr": tldr,
         "reduction": reduction,
-        "simplified": simplified['choices'][0]['text'],
+        "simplified": simplified['choices'][0]['text'].strip("\n"),
         "sensitivity": sens,
         "articles": articles,
         "censored": censored,
@@ -286,6 +264,11 @@ def do_the_thing():
 def openaikeychange():
     """
     Changes the API key so we can swap between accounts on prod
+
+    args:
+        String key: OpenAI API key
+    returns:
+        "Success"
     """
     if "key" not in request.json:
         return Response("Expected parameter 'key' in body", status=400)
@@ -298,6 +281,11 @@ def openaikeychange():
 def dothethingdev():
     """
     Testing endpoint for frontend, to prevent overuse of OpenAi tokens
+
+    args:
+        None
+    returns:
+        Mimic response of real /dothethingdev endpoint
     """
     time.sleep(3)
 
@@ -328,7 +316,9 @@ def dothethingdev():
             "url": "https://www.nytimes.com/2021/08/17/opinion/taliban-afghanistan.html"
         }
     ],
+    "censored": True,
     "reduction": 50,
+    "reliability": "low",
     "sensitivity": "0",
     "simplified": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Parturient montes nascetur ridiculus mus. Rutrum quisque non tellus orci. Purus sit amet luctus venenatis lectus magna. Mattis vulputate enim nulla aliquet porttitor lacus luctus accumsan tortor. Mi eget mauris pharetra et ultrices neque ornare aenean. Ac felis donec et odio pellentesque diam volutpat commodo sed. Gravida in fermentum et sollicitudin ac orci phasellus egestas. Amet justo donec enim diam vulputate. Nec ullamcorper sit amet risus nullam. Vitae justo eget magna fermentum iaculis. Sed odio morbi quis commodo odio aenean sed adipiscing. Diam quis enim lobortis scelerisque fermentum dui faucibus. Varius sit amet mattis vulputate enim nulla aliquet porttitor lacus. Quis lectus nulla at volutpat diam ut venenatis tellus in. Tortor consequat id porta nibh venenatis cras sed felis. Mollis nunc sed id semper risus in hendrerit gravida. Nisl vel pretium lectus quam id leo. In nisl nisi scelerisque eu ultrices vitae auctor eu augue. Blandit libero volutpat sed cras ornare. Morbi tristique senectus et netus et malesuada fames. Vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor at risus viverra adipiscing at. Porta lorem mollis aliquam ut porttitor leo a diam. Posuere morbi leo urna molestie at elementum eu facilisis sed. Risus nec feugiat in fermentum posuere urna nec. Viverra maecenas accumsan lacus vel. Nisi quis eleifend quam adipiscing vitae proin sagittis nisl rhoncus. Quam elementum pulvinar etiam non quam lacus suspendisse faucibus. Tincidunt eget nullam non nisi est. Ipsum a arcu cursus vitae congue. Aliquet eget sit amet tellus.",
     "tldr": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Parturient montes nascetur ridiculus mus. Rutrum quisque non tellus orci. Purus sit amet luctus venenatis lectus magna. Mattis vulputate enim nulla aliquet porttitor lacus luctus accumsan tortor. Mi eget mauris pharetra et ultrices neque ornare aenean. Ac felis donec et odio pellentesque diam volutpat commodo sed. Gravida in fermentum et sollicitudin ac orci phasellus egestas. Amet justo donec enim diam vulputate. Nec ullamcorper sit amet risus nullam. Vitae justo eget magna fermentum iaculis. Sed odio morbi quis commodo odio aenean sed adipiscing. Diam quis enim lobortis scelerisque fermentum dui faucibus. Varius sit amet mattis vulputate enim nulla aliquet porttitor lacus. Quis lectus nulla at volutpat diam ut venenatis tellus in. Tortor consequat id porta nibh venenatis cras sed felis. Mollis nunc sed id semper risus in hendrerit gravida. Nisl vel pretium lectus quam id leo. In nisl nisi scelerisque eu ultrices vitae auctor eu augue. Blandit libero volutpat sed cras ornare. Morbi tristique senectus et netus et malesuada fames. Vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor at risus viverra adipiscing at. Porta lorem mollis aliquam ut porttitor leo a diam. Posuere morbi leo urna molestie at elementum eu facilisis sed. Risus nec feugiat in fermentum posuere urna nec. Viverra maecenas accumsan lacus vel. Nisi quis eleifend quam adipiscing vitae proin sagittis nisl rhoncus. Quam elementum pulvinar etiam non quam lacus suspendisse faucibus. Tincidunt eget nullam non nisi est. Ipsum a arcu cursus vitae congue. Aliquet eget sit amet tellus."
@@ -337,9 +327,7 @@ def dothethingdev():
 
 @app.route('/api/banana', methods=['POST'])
 def banana():
-    """ 
-    Frontend requested this??
-    """
+    """ Frontend requested this?? """
     return jsonify({
         "value": "banana"
     })
@@ -350,3 +338,4 @@ if __name__ == "__main__":
     openai.api_key = os.getenv('OPENAI_SK')
     port = int(os.environ.get('PORT', 5000))
     app.run(port=port)
+    # app.run(host='0.0.0.0', port=port)
