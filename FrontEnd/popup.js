@@ -85,9 +85,9 @@ function populateSimilarArticles(articles, censorImages) {
         let articleImg = document.createElement("img");
         chrome.storage.sync.get("censorImages", (data) => {
             if (data.censorImages && censorImages) {
-                articleImg.setAttribute("src", article.image);
+                articleImg.setAttribute("src", getPlaceHolderImage());
             } {
-                articleImg.setAttribute("src", getPlaceHolderImage())
+                articleImg.setAttribute("src", article.image);
             }
         })
         articleTile.appendChild(articleImg);
