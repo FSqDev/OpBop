@@ -70,10 +70,11 @@ function populateTldr(tldrText, reductionPercent, sensitivity, censored, reliabi
     let tldrReduction = document.getElementById("tldr-reduction");
     tldrReduction.innerHTML = `Article length reduced by <b>${reductionPercent}%</b>`;
 
-    if (!censored && !(reliability === "mixed" || reliability === "low")) {
-        tldr.innerHTML = tldrText;
-    } else {
-        chrome.storage.sync.get("disableReliabilityWarning", (data) => {
+    chrome.storage.sync.get("disableReliabilityWarning", (data) => {
+        let showReliabilityWarning = !data.disableReliabilityWarning && (reliability === "mixed" || reliability === "low")
+        if (!censored && !showReliabilityWarning) {
+            tldr.innerHTML = tldrText;
+        } else {
 
             tldr.innerText = getWarning(censored, sensitivity, reliability, data.disableReliabilityWarning);
 
@@ -84,16 +85,16 @@ function populateTldr(tldrText, reductionPercent, sensitivity, censored, reliabi
                 tldr.innerText = tldrText;
                 showCensoredButton.setAttribute("hidden", null)
             });
-        });
-    }
+        }
+    });
 }
 
 function populateSimplified(simiplifiedText, sensitivity, censored, reliability) {
     let simplified = document.getElementById("simplified-text");
-    if (!censored && !(reliability === "mixed" || reliability === "low")) {
-        simplified.innerText = simiplifiedText;
-    } else {
-        chrome.storage.sync.get("disableReliabilityWarning", (data) => {
+    chrome.storage.sync.get("disableReliabilityWarning", (data) => {
+        if (!censored && !(reliability === "mixed" || reliability === "low")) {
+            simplified.innerText = simiplifiedText;
+        } else {
 
             simplified.innerText = getWarning(censored, sensitivity, reliability, data.disableReliabilityWarning);
 
@@ -104,8 +105,8 @@ function populateSimplified(simiplifiedText, sensitivity, censored, reliability)
                 simplified.innerText = simiplifiedText;
                 showCensoredButton.setAttribute("hidden", null)
             })
-        });
-    }
+        }
+    });
 
 }
 
