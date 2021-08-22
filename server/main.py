@@ -238,16 +238,6 @@ def do_the_thing():
     censored = False
     if filterbaddybads < int(sens):
         censored = True
-        if sens == "1":
-            warning = (
-                "This article contains potentially sensitive topics, "
-                "eg. political, religious or race related content."
-            )
-        elif sens == "2":
-            warning = (
-                "This article contains unsafe content, "
-                "eg. profane/prejudice language."
-            )
 
     articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], request.json["blacklist"])
 
@@ -265,9 +255,9 @@ def do_the_thing():
     #     reliable = True if "yes" in reliable else False
 
     return jsonify({
-        "tldr": tldr if warning == "" else warning,
+        "tldr": tldr,
         "reduction": reduction,
-        "simplified": simplified['choices'][0]['text'] if warning == "" else warning,
+        "simplified": simplified['choices'][0]['text'],
         "sensitivity": sens,
         "articles": articles,
         "censored": censored
