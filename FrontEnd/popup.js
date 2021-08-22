@@ -4,7 +4,7 @@ const apiPath = basePath + 'api/'
 
 const urls = {
     banana : apiPath + 'banana',
-    main : apiPath + 'dothethingdev'
+    main : apiPath + 'dothething'
 }
 
 // Main function - parse and show
@@ -40,14 +40,20 @@ function parse(url) {
                 })
             }
         ).then(function (res) {
-            res.json().then(function(data) {
-                populateTldr(data.tldr, data.reduction);
-                populateSimplified(data.simplified);
-                populateSimilarArticles(data.articles, data.censored);
-                document.body.style.width = "500px"; // TODO: smooth this transition
+            if (res.status === 200) {
+                res.json().then(function (data) {
+                    populateTldr(data.tldr, data.reduction);
+                    populateSimplified(data.simplified);
+                    populateSimilarArticles(data.articles, data.censored);
+                    document.body.style.width = "500px"; // TODO: smooth this transition
+                    document.getElementById("parse-idle").setAttribute("hidden", null)
+                    document.getElementById("parsed-container").removeAttribute("hidden")
+                });
+            } else {
                 document.getElementById("parse-idle").setAttribute("hidden", null)
-                document.getElementById("parsed-container").removeAttribute("hidden")
-            });
+                document.getElementById("error-image").setAttribute("src", "https://http.cat/" + res.status + ".jpg")
+                document.getElementById("error-div").removeAttribute("hidden")
+            }
         });
     });
 }
