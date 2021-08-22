@@ -166,3 +166,21 @@ a:hover {
 #parseButton {
   margin: 0.25em;
 }
+
+#tldr-show-censored {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 150px;
+}
+
+#simplified-show-censored {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 150px;
+}
