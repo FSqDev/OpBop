@@ -42,8 +42,8 @@ function parse(url) {
         ).then(function (res) {
             if (res.status === 200) {
                 res.json().then(function (data) {
-                    populateTldr(data.tldr, data.reduction);
-                    populateSimplified(data.simplified);
+                    populateTldr(data.tldr, data.reduction, data.sensitivity, data.censored);
+                    populateSimplified(data.simplified, data.sensitivity, data.censored);
                     populateSimilarArticles(data.articles, data.censored);
                     document.body.style.width = "500px"; // TODO: smooth this transition
                     document.getElementById("parse-idle").setAttribute("hidden", null)
@@ -59,20 +59,52 @@ function parse(url) {
 }
 
 // Populate fields with API return
-function populateTldr(tldrText, reductionPercent) {
+function populateTldr(tldrText, reductionPercent, sensitivity, censored) {
     let tldr = document.getElementById("tldr-text");
-    tldr.innerHTML = tldrText;
 
     let tldrReduction = document.getElementById("tldr-reduction");
     tldrReduction.innerHTML = `Article length reduced by <b>${reductionPercent}%</b>`;
+
+    if (!censored) {
+        tldr.innerHTML = tldrText;
+    } else {
+        if (sensitivity === "1") {
+            tldr.innerText = "This article contains potentially sensitive topics, eg. political, religious or race related content."
+        } else if (sensitivity === "2") {
+            tldr.innerText = "This article contains unsafe content, eg. profane/prejudice language."
+        }
+        let showCensoredButton = document.getElementById("tldr-show-censored");
+        showCensoredButton.removeAttribute("hidden");
+
+        showCensoredButton.addEventListener("click", () => {
+            tldr.innerText = tldrText;
+            showCensoredButton.setAttribute("hidden", null)
+        })
+    }
 }
 
-function populateSimplified(simiplifiedText) {
+function populateSimplified(simiplifiedText, sensitivity, censored) {
     let simplified = document.getElementById("simplified-text");
-    simplified.innerText = simiplifiedText;
+    if (!censored) {
+        simplified.innerText = simiplifiedText;
+    } else {
+        if (sensitivity === "1") {
+            simplified.innerText = "This article contains potentially sensitive topics, eg. political, religious or race related content."
+        } else if (sensitivity === "2") {
+            simplified.innerText = "This article contains unsafe content, eg. profane/prejudice language."
+        }
+        let showCensoredButton = document.getElementById("simplified-show-censored");
+        showCensoredButton.removeAttribute("hidden");
+
+        showCensoredButton.addEventListener("click", () => {
+            simplified.innerText = simiplifiedText;
+            showCensoredButton.setAttribute("hidden", null)
+        })
+    }
+
 }
 
-function populateSimilarArticles(articles, censorImages) {
+function populateSimilarArticles(articles, censored) {
     const similarArticleDiv = document.getElementById("nav-similar");
     similarArticleDiv.innerHTML = "";
     let articleNumber = 0;
@@ -84,7 +116,7 @@ function populateSimilarArticles(articles, censorImages) {
         articleTile.classList.add("article-tile")
         let articleImg = document.createElement("img");
         chrome.storage.sync.get("censorImages", (data) => {
-            if (data.censorImages && censorImages) {
+            if (data.censorImages && censored) {
                 articleImg.setAttribute("src", getPlaceHolderImage());
             } {
                 articleImg.setAttribute("src", article.image);
