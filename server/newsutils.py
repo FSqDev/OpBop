@@ -93,6 +93,12 @@ class NewsUtils:
                 webpage = urlopen(url).read()
                 soup = BeautifulSoup(webpage, "lxml")
 
+                img = soup.find("meta", property="og:image")
+                if img is None:
+                    img = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png"
+                else:
+                    img = img["content"]
+
                 if urlparse(url).netloc.strip("www.") in blacklist:
                     pass
                 else:
@@ -100,7 +106,7 @@ class NewsUtils:
                     ret.append({
                         "title": child[NewsUtils.RSS_INDEX["title"]].text,
                         "url": url,
-                        "image": soup.find("meta", property="og:image")["content"],
+                        "image": img,
                         "source": child[NewsUtils.RSS_INDEX["source"]].text
                     })
 
