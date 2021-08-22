@@ -6,11 +6,11 @@ from dotenv import load_dotenv
 
 # Custom wrappers
 from newsutils import NewsUtils
-from otherthings import summarize
+from otherthings import summarize, load_reliability_data
 import openai
 from dotenv import load_dotenv
 from pprint import pprint
-import re
+import tldextract
 
 # Debugging
 import time
@@ -20,6 +20,10 @@ app = Flask("app")
 app.debug = True
 news_utils = NewsUtils()
 cors = CORS(app)
+
+reliability_data = load_reliability_data()
+pprint(reliability_data)
+
 
 # @app.after_request
 # def after_request(response):
@@ -219,17 +223,31 @@ def do_the_thing():
             break
         except openai.error.InvalidRequestError:
             tldr = summarize(tldr)
-
-    sensitivity = openai.Completion.create(
-        engine="content-filter-alpha-c4",
-        prompt = "<|endoftext|>"+maintext+"\n--\nLabel:",
-        temperature=0,
-        max_tokens=1,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-        logprobs=10
-    )
+    sensitivity = None
+    t = maintext
+    try:
+        sensitivity = openai.Completion.create(
+            engine="content-filter-alpha-c4",
+            prompt = "<|endoftext|>"+t+"\n--\nLabel:",
+            temperature=0,
+            max_tokens=1,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            logprobs=10
+        )
+    except openai.error.InvalidRequestError:
+        t = tldr
+        sensitivity = openai.Completion.create(
+            engine="content-filter-alpha-c4",
+            prompt = "<|endoftext|>"+t+"\n--\nLabel:",
+            temperature=0,
+            max_tokens=1,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            logprobs=10
+        )
 
     sens = sensitivity["choices"][0]["text"]
     filterbaddybads = int(request.json["filterExplicit"])
@@ -254,13 +272,21 @@ def do_the_thing():
     #     print(reliable)
     #     reliable = True if "yes" in reliable else False
 
+    try:
+        do_be_reliable = reliability_data[
+            '.'.join(tldextract.extract(request.json['url'])[1:])
+        ]
+    except KeyError:
+        do_be_reliable = "unknown"
+
     return jsonify({
         "tldr": tldr,
         "reduction": reduction,
         "simplified": simplified['choices'][0]['text'],
         "sensitivity": sens,
         "articles": articles,
-        "censored": censored
+        "censored": censored,
+        "reliability": do_be_reliable
     })
 
 
