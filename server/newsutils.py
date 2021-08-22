@@ -82,7 +82,7 @@ class NewsUtils:
     def similar_articles(self, keywords: list, fromm, to, blacklist: list) -> list:
         """ Given a list of keywords, finds relevant news articles published within specified number of days """
         ret = []
-
+        
         xml_root = ET.fromstring(self._load_rss(keywords, fromm, to))
         count = 0
         for child in xml_root[0]:
