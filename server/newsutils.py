@@ -4,9 +4,11 @@ nltk.download('stopwords')
 nltk.download('punkt')
 from nltk import tokenize
 from nltk.corpus import stopwords
+
 # Keywords - other
 from operator import itemgetter
 import math
+
 # Scraping
 from newspaper import Article
 import requests
@@ -15,6 +17,7 @@ from urllib.request import urlopen
 from urllib.parse import urlparse
 from urllib.error import HTTPError
 from bs4 import BeautifulSoup
+
 
 class NewsUtils:
     """ Class that handles fetching, parsing and searching of news articles for OpBop """
@@ -37,7 +40,11 @@ class NewsUtils:
         }
 
     def parse_keywords(self, text: str) -> list:
-        """ Extracts keywords from a passage of text """
+        """ 
+        Extracts keywords from a passage of text 
+        Implementation of the TF-IDF algorithm
+        (Term Frequency – Inverse Document Frequency)
+        """
         # Input cleaning
         text = text.replace(",", "")
         text = text.lower()
