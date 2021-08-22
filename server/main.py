@@ -186,7 +186,7 @@ def do_the_thing():
         return Response("Expected parameter 'filterExplicit' in body", status=400)
     elif request.json["filterExplicit"] not in ["0", "1", "2"]:
         return Response("Invalid parameter: Filter level should be one of 0, 1, or 2", status=400)
-    if "blackList" not in request.json:
+    if "blacklist" not in request.json:
         return Response("Expected parameter 'blacklist' in body", status=400)
     # if "checkReliability" not in request.json:
     #     return Response("Expected parameter 'checkReliability' in body", status=400)
@@ -246,7 +246,7 @@ def do_the_thing():
                 "eg. profane/prejudice language."
             )
 
-    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], request.json["blackList"])
+    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], request.json["blacklist"])
 
     # reliable = None
     # if checkReliable:
