@@ -9,6 +9,7 @@ from otherthings import summarize
 import openai
 from dotenv import load_dotenv
 from pprint import pprint
+import re
 
 # Debugging
 import time
@@ -156,10 +157,16 @@ def do_the_thing():
         String sensitivity: sensitive content flag
         List articles: similar articles
     """
+    range = None
     if "url" not in request.json:
         return Response("Expected parameter 'url' in body", status=400)
     if "articleRange" not in request.json:
-        return Response("Expected parameter 'articleRange' in body", status=400)
+        range = {
+            "from": "2020-08-21",
+            "to": "2021-08-21"
+        }
+    else:
+        range = request.json["articleRange"]
     if "filterExplicit" not in request.json:
         return Response("Expected parameter 'filterExplicit' in body", status=400)
     elif request.json["filterExplicit"] not in ["0", "1", "2"]:
@@ -169,6 +176,11 @@ def do_the_thing():
 
     range = request.json["articleRange"]
 
+    # checkReliable = request.json["checkReliability"].lower()
+    # if checkReliable not in {"true", "false"}:
+    #     return Response("Expected checkReliability to be bool", status=400)
+    # checkReliable = True if checkReliable == "true" else False
+
     parsed = news_utils.parse_maintext_title(request.json["url"])
     maintext = parsed["maintext"]
     tldr = summarize(maintext)
@@ -176,6 +188,7 @@ def do_the_thing():
     reduction = ""
     while True:
         try:
+            print("FUCK")
             simplified = openai.Completion.create(
                 engine='davinci-instruct-beta',
                 prompt=f"explain the following text in a way a second grader would understand:\n\\\n{tldr}\n",
@@ -184,7 +197,7 @@ def do_the_thing():
                 frequency_penalty=0.0,
                 presence_penalty=0.0,
                 stop=["\"\"\""],
-                max_tokens=len(tldr.split())
+                # max_tokens=len(tldr.split())
             )
             reduction = int(100 * ((len(maintext) - len(tldr)) / len(maintext)))
             break
@@ -192,14 +205,14 @@ def do_the_thing():
             tldr = summarize(tldr)
 
     sensitivity = openai.Completion.create(
-      engine="content-filter-alpha-c4",
-      prompt = "<|endoftext|>"+maintext+"\n--\nLabel:",
-      temperature=0,
-      max_tokens=1,
-      top_p=1,
-      frequency_penalty=0,
-      presence_penalty=0,
-      logprobs=10
+        engine="content-filter-alpha-c4",
+        prompt = "<|endoftext|>"+maintext+"\n--\nLabel:",
+        temperature=0,
+        max_tokens=1,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        logprobs=10
     )
 
     sens = sensitivity["choices"][0]["text"]
@@ -218,7 +231,20 @@ def do_the_thing():
                 "eg. profane/prejudice language."
             )
 
-    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], [])
+    articles = news_utils.similar_articles(news_utils.parse_keywords(parsed["title"]), range['from'], range['to'], request.json["blacklist"])
+
+    # reliable = None
+    # if checkReliable:
+    #     reliable = openai.Completion.create(
+    #         engine='davinci-instruct-beta',
+    #         prompt=(
+    #             "Give me a one word yes or no answer to this question:\n\n"
+    #             "Is this news article reliable?\n\n"
+    #             f"{request.json['url']}"
+    #         )
+    #     )['choices'][0]['text'].lower()
+    #     print(reliable)
+    #     reliable = True if "yes" in reliable else False
 
     return jsonify({
         "tldr": tldr if warning == "" else warning,
