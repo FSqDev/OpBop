@@ -113,13 +113,6 @@ button:hover{
     background-color:#222;
 }
 
-/* @media all and (max-width:30em){
-    button{
-        display:block;
-        margin:0.4em auto;
-    }
-} */
-
 input[type=checkbox]:checked {
     background-color: #222;
     border-color: #222;
