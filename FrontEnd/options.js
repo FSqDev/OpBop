@@ -6,42 +6,52 @@ let articleDateWarning = document.getElementById("article-date-warning");
 let enableDateFiltering = document.getElementById("should-filter-article-range");
 let blackListAddButton = document.getElementById("blacklist-add");
 let censorImageCheckbox = document.getElementById("censor-images");
+let disableReliabilityWarningCheckbox = document.getElementById("disable-reliablity-warning");
 
 // Sensitive content filter components
 let filterSlider = document.getElementById("filter-level")
 
 // Render page
 function initializeOptions() {
-    chrome.storage.sync.get(["enableSimilarArticleFiltering", "articleRangeBefore", "articleRangeAfter", "filterLevel", "censorImages"], (data) => {
-        let enableSimilarArticleFiltering = data.enableSimilarArticleFiltering;
-        enableDateFiltering.checked = enableSimilarArticleFiltering;
-        disableDateFiltering(enableSimilarArticleFiltering);
+    chrome.storage.sync.get(
+        [
+            "enableSimilarArticleFiltering",
+            "articleRangeBefore",
+            "articleRangeAfter",
+            "filterLevel",
+            "censorImages",
+            "disableReliabilityWarning"
+        ], (data) => {
+            let enableSimilarArticleFiltering = data.enableSimilarArticleFiltering;
+            enableDateFiltering.checked = enableSimilarArticleFiltering;
+            disableDateFiltering(enableSimilarArticleFiltering);
 
-        let beforeDate = data.articleRangeBefore;
-        if (beforeDate != undefined) {
-            articleRangeBefore.value = beforeDate;
-        }
+            let beforeDate = data.articleRangeBefore;
+            if (beforeDate != undefined) {
+                articleRangeBefore.value = beforeDate;
+            }
 
-        let afterDate = data.articleRangeAfter;
-        if (afterDate != undefined) {
-            articleRangeAfter.value = afterDate;
-        }
+            let afterDate = data.articleRangeAfter;
+            if (afterDate != undefined) {
+                articleRangeAfter.value = afterDate;
+            }
 
-        checkArticleRangeValidity()
+            checkArticleRangeValidity();
 
-        let filterLevel = data.filterLevel;
-        if (filterLevel != undefined) {
-            filterSlider.value = filterLevel;
-        } else {
-            filterSlider.value = "0";
-        }
+            let filterLevel = data.filterLevel;
+            if (filterLevel != undefined) {
+                filterSlider.value = filterLevel;
+            } else {
+                filterSlider.value = "0";
+            }
 
-        censorImageCheckbox.checked = data.censorImages;
+            censorImageCheckbox.checked = data.censorImages;
+            disableReliabilityWarningCheckbox.checked = data.disableReliabilityWarning;
 
-        updateFilterWarning()
+            updateFilterWarning()
 
-        renderBlackList();
-    });
+            renderBlackList();
+        });
 
     articleRangeBefore.addEventListener('input', updateArticleRangeBeforeValue);
     articleRangeAfter.addEventListener('input', updateArticleRangeAfterValue);
@@ -49,6 +59,7 @@ function initializeOptions() {
     blackListAddButton.addEventListener('click', addToBlackList)
     filterSlider.addEventListener('input', updateExplicitFiltering);
     censorImageCheckbox.addEventListener('input', updateCensorImages);
+    disableReliabilityWarningCheckbox.addEventListener('input', updateDisableReliabilityWarning);
 }
 
 // Article date filtering
@@ -159,7 +170,12 @@ function updateFilterWarning() {
 
 function updateCensorImages(value) {
     let censorImages = value.target.checked;
-    chrome.storage.sync.set({ censorImages })
+    chrome.storage.sync.set({censorImages})
+}
+
+function updateDisableReliabilityWarning(value) {
+    let disableReliabilityWarning = value.target.checked;
+    chrome.storage.sync.set({disableReliabilityWarning})
 }
 
 initializeOptions();

@@ -4,8 +4,8 @@ const basePath = 'http://127.0.0.1:5000/'
 const apiPath = basePath + 'api/'
 
 const urls = {
-    banana : apiPath + 'banana',
-    main : apiPath + 'dothething'
+    banana: apiPath + 'banana',
+    main: apiPath + 'dothething'
 }
 
 // Main function - parse and show
@@ -43,8 +43,8 @@ function parse(url) {
         ).then(function (res) {
             if (res.status === 200) {
                 res.json().then(function (data) {
-                    populateTldr(data.tldr, data.reduction, data.sensitivity, data.censored);
-                    populateSimplified(data.simplified, data.sensitivity, data.censored);
+                    populateTldr(data.tldr, data.reduction, data.sensitivity, data.censored, data.reliability);
+                    populateSimplified(data.simplified, data.sensitivity, data.censored, data.reliability);
                     populateSimilarArticles(data.articles, data.censored);
                     document.body.style.width = "500px"; // TODO: smooth this transition
                     document.getElementById("parse-idle").setAttribute("hidden", null)
@@ -62,48 +62,49 @@ function parse(url) {
         });
     });
 }
+
 // Populate fields with API return
-function populateTldr(tldrText, reductionPercent, sensitivity, censored) {
+function populateTldr(tldrText, reductionPercent, sensitivity, censored, reliability) {
     let tldr = document.getElementById("tldr-text");
 
     let tldrReduction = document.getElementById("tldr-reduction");
     tldrReduction.innerHTML = `Article length reduced by <b>${reductionPercent}%</b>`;
 
-    if (!censored) {
+    if (!censored && !(reliability === "mixed" || reliability === "low")) {
         tldr.innerHTML = tldrText;
     } else {
-        if (sensitivity === "1") {
-            tldr.innerText = "This article contains potentially sensitive topics, eg. political, religious or race related content."
-        } else if (sensitivity === "2") {
-            tldr.innerText = "This article contains unsafe content, eg. profane/prejudice language."
-        }
-        let showCensoredButton = document.getElementById("tldr-show-censored");
-        showCensoredButton.removeAttribute("hidden");
+        chrome.storage.sync.get("disableReliabilityWarning", (data) => {
 
-        showCensoredButton.addEventListener("click", () => {
-            tldr.innerText = tldrText;
-            showCensoredButton.setAttribute("hidden", null)
-        })
+            tldr.innerText = getWarning(censored, sensitivity, reliability, data.disableReliabilityWarning);
+
+            let showCensoredButton = document.getElementById("tldr-show-censored");
+            showCensoredButton.removeAttribute("hidden");
+
+            showCensoredButton.addEventListener("click", () => {
+                tldr.innerText = tldrText;
+                showCensoredButton.setAttribute("hidden", null)
+            });
+        });
     }
 }
 
-function populateSimplified(simiplifiedText, sensitivity, censored) {
+function populateSimplified(simiplifiedText, sensitivity, censored, reliability) {
     let simplified = document.getElementById("simplified-text");
-    if (!censored) {
+    if (!censored && !(reliability === "mixed" || reliability === "low")) {
         simplified.innerText = simiplifiedText;
     } else {
-        if (sensitivity === "1") {
-            simplified.innerText = "This article contains potentially sensitive topics, eg. political, religious or race related content."
-        } else if (sensitivity === "2") {
-            simplified.innerText = "This article contains unsafe content, eg. profane/prejudice language."
-        }
-        let showCensoredButton = document.getElementById("simplified-show-censored");
-        showCensoredButton.removeAttribute("hidden");
+        chrome.storage.sync.get("disableReliabilityWarning", (data) => {
 
-        showCensoredButton.addEventListener("click", () => {
-            simplified.innerText = simiplifiedText;
-            showCensoredButton.setAttribute("hidden", null)
-        })
+            simplified.innerText = getWarning(censored, sensitivity, reliability, data.disableReliabilityWarning);
+
+            let showCensoredButton = document.getElementById("simplified-show-censored");
+            showCensoredButton.removeAttribute("hidden");
+
+            showCensoredButton.addEventListener("click", () => {
+                simplified.innerText = simiplifiedText;
+                showCensoredButton.setAttribute("hidden", null)
+            })
+        });
     }
 
 }
@@ -146,11 +147,11 @@ function populateSimilarArticles(articles, censored) {
 }
 
 function openUrl(url) {
-    chrome.tabs.create({ url: url});
+    chrome.tabs.create({url: url});
 }
 
 // Because comedy
-function getLoadingMessage () {
+function getLoadingMessage() {
     let messages = [
         "Bending the spoon...",
         "Filtering morale...",
@@ -204,4 +205,33 @@ function getPlaceHolderImage() {
 
     const random = Math.floor(Math.random() * images.length);
     return images[random];
+}
+
+function getCensoredText(sensitivity) {
+    if (sensitivity === "1") {
+        return ("This article contains potentially sensitive topics, eg. political, religious or race related content.");
+    } else if (sensitivity === "2") {
+        return ("This article contains unsafe content, eg. profane/prejudice language.")
+    }
+}
+
+function getWarning(censored, sensitivity, reliability, disableReliabilityWarning) {
+
+    let warning = "";
+
+    let showReliabilityWarning = !disableReliabilityWarning && (reliability === "mixed" || reliability === "low");
+    if (censored) {
+        warning += getCensoredText(sensitivity);
+    }
+
+    if (censored && showReliabilityWarning) {
+        warning += "\n\n";
+    }
+
+    if (showReliabilityWarning) {
+        warning += "This source is known to have " + reliability + " reliability. Be wary of what you read here and consider validating information here with other sources.";
+    }
+
+    return (warning);
+
 }
