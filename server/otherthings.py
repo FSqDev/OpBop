@@ -1,11 +1,19 @@
 import nltk
 import string
 from heapq import nlargest
+from csv import reader
 
 # write a function to summarize a body of text
 # it should take a string as input and return a string
 # summarizing the text
 
+
+def load_reliability_data():
+    rawdawg = reader(open("reliability.tsv"), delimiter='\t')
+    m = {}
+    for row in rawdawg:
+        m[row[1]] = row[3]
+    return m
 
 def summarize(text: str) -> dict:
     dick = 10 if text.count(".") > 10 else 5
