@@ -1,5 +1,5 @@
 // Api call params
-const basePath = 'https://opbop.herokuapp.com/'
+const basePath = 'http://184.146.22.108:5000/'
 // const basePath = 'http://127.0.0.1:5000/'
 const apiPath = basePath + 'api/'
 
@@ -119,7 +119,7 @@ function populateSimilarArticles(articles, censored) {
         chrome.storage.sync.get("censorImages", (data) => {
             if (data.censorImages && censored) {
                 articleImg.setAttribute("src", getPlaceHolderImage());
-            } {
+            } else {
                 articleImg.setAttribute("src", article.image);
             }
         })
